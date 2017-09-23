@@ -2,13 +2,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.*;
 
-@TeleOp(name="Test", group="AlBot")
-@Disabled
+@TeleOp(name="Test", group="TeleOp")
 
 public class Test extends OpMode {
-
     @Override
     public void init() {
+        telemetry.addData("Status", "potato");
+        System.out.println("init");
     }
 
     @Override
@@ -17,6 +17,7 @@ public class Test extends OpMode {
 
     @Override
     public void start() {
+        System.out.println("start");
     }
 
     @Override
