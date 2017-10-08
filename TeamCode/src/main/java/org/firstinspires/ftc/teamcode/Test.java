@@ -25,10 +25,10 @@ public class Test extends LinearOpMode {
         VuforiaLocalizer frontCamera = ClassFactory.createVuforiaLocalizer(frontCameraParams);
         Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 3);
 
-        VuforiaTrackables patterns = frontCamera.loadTrackablesFromAsset("RelicVuMark");
-        patterns.get(0).setName("Left");
-        //patterns.get(1).setName("Center");
-        //patterns.get(2).setName("Right");
+        VuforiaTrackables patterns = frontCamera.loadTrackablesFromAsset("FTC_2017-18");
+        patterns.get(0).setName("left");
+        patterns.get(1).setName("center");
+        patterns.get(2).setName("right");
 
         telemetry.addData("Stats", "Initialized");
         telemetry.update();
