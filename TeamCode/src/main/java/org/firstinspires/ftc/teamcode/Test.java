@@ -24,16 +24,6 @@ public class Test extends LinearOpMode {
         telemetry.addData("Status", "Initializing Vuforia");
         telemetry.update();
 
-        /*VuforiaLocalizer.Parameters frontCameraParams = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
-        frontCameraParams.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        frontCameraParams.vuforiaLicenseKey = "AZ2wdn//////AAAAGd+igk3mFkjUu//Hqbk31B1Dz4LHSIUWiWcEduepObWceIiDsR9tP4YqeWjdMXZLEXOC9SdNO8xaYhy+gbC15PloamZaO0NFX+DCrplKuffSK0V4gJeUIuLt58UoTBL3OpZcYfna11vh8Xl3Rw6uaSl6rjWqy+MxPHJjgQPoNu7hhb7bK7vvfB9IUDk61aKwpZv20372DMWVagzzYXX6Z5jwArqAFxxfYFROxnCU4jBVjD/ZqYhBK+1TD+qaOSaNuAHp6Yqx54I6xr5Zq76joKn9DF1XmSd4u4rfRg+iRk1995ldmWz/lVTH9V/JFecwKOSyYb9iZKcu77/Cjl5wYfhMfV/h419i6b5bZv+KOKKm";
-        frontCameraParams.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
-
-        VuforiaLocalizer frontCamera = ClassFactory.createVuforiaLocalizer(frontCameraParams);
-        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 3);
-
-        VuforiaTrackables patterns = frontCamera.loadTrackablesFromAsset("FTC_2017-18");*/
-
         OpenGLMatrix lastLocation = null;
         VuforiaLocalizer vuforia;
 
