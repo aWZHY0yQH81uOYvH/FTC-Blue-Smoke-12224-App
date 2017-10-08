@@ -12,11 +12,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 @TeleOp
-@Disabled
 public class Test extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initializing Vuforia");
+        telemetry.update();
         VuforiaLocalizer.Parameters frontCameraParams = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
         frontCameraParams.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         frontCameraParams.vuforiaLicenseKey = "AZ2wdn//////AAAAGd+igk3mFkjUu//Hqbk31B1Dz4LHSIUWiWcEduepObWceIiDsR9tP4YqeWjdMXZLEXOC9SdNO8xaYhy+gbC15PloamZaO0NFX+DCrplKuffSK0V4gJeUIuLt58UoTBL3OpZcYfna11vh8Xl3Rw6uaSl6rjWqy+MxPHJjgQPoNu7hhb7bK7vvfB9IUDk61aKwpZv20372DMWVagzzYXX6Z5jwArqAFxxfYFROxnCU4jBVjD/ZqYhBK+1TD+qaOSaNuAHp6Yqx54I6xr5Zq76joKn9DF1XmSd4u4rfRg+iRk1995ldmWz/lVTH9V/JFecwKOSyYb9iZKcu77/Cjl5wYfhMfV/h419i6b5bZv+KOKKm";
@@ -27,10 +27,11 @@ public class Test extends LinearOpMode {
 
         VuforiaTrackables patterns = frontCamera.loadTrackablesFromAsset("RelicVuMark");
         patterns.get(0).setName("Left");
-        patterns.get(1).setName("Center");
-        patterns.get(2).setName("Right");
+        //patterns.get(1).setName("Center");
+        //patterns.get(2).setName("Right");
 
         telemetry.addData("Stats", "Initialized");
+        telemetry.update();
 
         waitForStart();
 
@@ -42,6 +43,7 @@ public class Test extends LinearOpMode {
                 if(place==null) telemetry.addData(thing.getName(), "No");
                 else telemetry.addData(thing.getName(), "Yes");
             }
+            telemetry.update();
         }
     }
 }
