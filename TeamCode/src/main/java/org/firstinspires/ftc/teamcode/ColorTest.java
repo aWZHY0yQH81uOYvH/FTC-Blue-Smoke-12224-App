@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 
 @TeleOp
@@ -23,6 +24,10 @@ public class ColorTest extends LinearOpMode {
         ColorSensor color = null;
         color = hardwareMap.colorSensor.get("color");
 
+        DcMotor motor;
+        double  power = 0;
+        motor = hardwareMap.get(DcMotor.class, "left_drive");
+
         telemetry.addData("Stats", "Initialized");
         telemetry.update();
 
@@ -35,6 +40,12 @@ public class ColorTest extends LinearOpMode {
             else if(color.red()>=2&&color.blue()<2&&color.green()<2) probableColor="red";
             else probableColor="?";
             telemetry.addData("Color", "Probably "+probableColor);
+
+            if(probableColor == "Probably red"){
+
+                motor.setPower(power);
+
+            }
 
             telemetry.update();
         }
