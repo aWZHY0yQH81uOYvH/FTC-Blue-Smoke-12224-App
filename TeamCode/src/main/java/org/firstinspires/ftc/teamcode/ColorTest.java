@@ -22,7 +22,6 @@ public class ColorTest extends LinearOpMode {
 
         ColorSensor color = null;
         color = hardwareMap.colorSensor.get("color");
-        color.enableLed(false);
 
         telemetry.addData("Stats", "Initialized");
         telemetry.update();
