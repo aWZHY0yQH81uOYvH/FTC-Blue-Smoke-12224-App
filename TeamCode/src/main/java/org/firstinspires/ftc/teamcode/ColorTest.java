@@ -21,8 +21,12 @@ public class ColorTest extends LinearOpMode {
         telemetry.addData("Status", "Initializing");
         telemetry.update();
 
+        //this is for the color sensor
+
         ColorSensor color = null;
         color = hardwareMap.colorSensor.get("color");
+
+        //this is for the motor
 
         DcMotor motor;
         double  power = 0;
