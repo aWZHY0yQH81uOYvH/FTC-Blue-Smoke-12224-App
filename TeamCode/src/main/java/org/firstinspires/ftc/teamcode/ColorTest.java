@@ -23,7 +23,7 @@ public class ColorTest extends LinearOpMode {
 
         //this is for the color sensor
 
-        ColorSensor color = null;
+        ColorSensor color;
         color = hardwareMap.colorSensor.get("color");
 
         //this is for the motor
