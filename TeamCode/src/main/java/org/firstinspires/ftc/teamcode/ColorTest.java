@@ -40,7 +40,9 @@ public class ColorTest extends LinearOpMode {
 
         while(opModeIsActive()) {
             telemetry.addData("Redness", color.red());
-            if(color.red()>0.5) motor.setPower(1);
+            telemetry.addData("Greeness", color.green());
+            telemetry.addData("Blueness", color.blue());
+            if(color.red()>1&&color.green()<1&&color.blue()<1) motor.setPower(1);
             else motor.setPower(0);
 
             telemetry.update();
