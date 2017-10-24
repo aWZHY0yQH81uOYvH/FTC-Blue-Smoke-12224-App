@@ -25,12 +25,13 @@ public class ColorTest extends LinearOpMode {
 
         ColorSensor color;
         color = hardwareMap.colorSensor.get("color");
+        color.enableLed(true);
 
         //this is for the motor
 
         DcMotor motor;
-        double  power = 0;
-        motor = hardwareMap.get(DcMotor.class, "left_drive");
+        motor = hardwareMap.get(DcMotor.class, "motorr");
+        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         telemetry.addData("Stats", "Initialized");
         telemetry.update();
@@ -38,18 +39,9 @@ public class ColorTest extends LinearOpMode {
         waitForStart();
 
         while(opModeIsActive()) {
-
-            String probableColor = "";
-            if(color.blue()>=2&&color.red()<2&&color.green()<2) probableColor="blue";
-            else if(color.red()>=2&&color.blue()<2&&color.green()<2) probableColor="red";
-            else probableColor="?";
-            telemetry.addData("Color", "Probably "+probableColor);
-
-            if(probableColor == "Probably red"){
-
-                motor.setPower(power);
-
-            }
+            telemetry.addData("Redness", color.red());
+            if(color.red()>0.5) motor.setPower(1);
+            else motor.setPower(0);
 
             telemetry.update();
         }
