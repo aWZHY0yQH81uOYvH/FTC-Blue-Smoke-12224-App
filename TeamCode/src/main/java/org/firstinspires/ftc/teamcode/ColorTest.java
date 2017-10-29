@@ -47,7 +47,7 @@ public class ColorTest extends LinearOpMode {
 
             if(probableColor == "Probably red"){
 
-                motor.setPower(power);
+
 
             }
 
