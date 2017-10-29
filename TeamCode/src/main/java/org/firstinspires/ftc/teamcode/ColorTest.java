@@ -24,7 +24,7 @@ public class ColorTest extends LinearOpMode {
         motor = hardwareMap.get(DcMotor.class, "motorr");
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        telemetry.addData("Stats", "Initialized");
+        telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         waitForStart();
@@ -33,7 +33,7 @@ public class ColorTest extends LinearOpMode {
             telemetry.addData("Redness", color.red());
             telemetry.addData("Greeness", color.green());
             telemetry.addData("Blueness", color.blue());
-            if(color.red()>1&&color.green()<color.red()/2&&color.blue()<color.red()/2) motor.setPower(1);
+            if(color.red()>1&&color.green()<color.red()/2&&color.blue()<color.red()/2) motor.setPower(0.25);
             else motor.setPower(0);
 
             telemetry.update();

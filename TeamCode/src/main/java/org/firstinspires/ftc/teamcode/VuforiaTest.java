@@ -27,7 +27,7 @@ public class VuforiaTest extends LinearOpMode {
         VuforiaTrackable relicTemplate = relicTrackables.get(0);
         relicTemplate.setName("relicVuMarkTemplate");
 
-        telemetry.addData("Stats", "Initialized");
+        telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         waitForStart();
