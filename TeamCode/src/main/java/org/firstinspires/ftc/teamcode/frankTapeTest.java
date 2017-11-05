@@ -1,16 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
-import android.graphics.Color;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 /**
  * Created by Frank on 11/5/2017.
@@ -42,15 +34,15 @@ public class frankTapeTest extends LinearOpMode {
             //testing for if it's red
 
             //if red is almost full
-            if(color.red() >= 230)
+            if(color.red() >= (color.blue() * 5))
             {
 
                // if blue is close to blank
-                if(color.blue() <= 20)
+                if(color.blue() <= 15)
                 {
 
                     //if green is close to blank
-                    if(color.green() <= 20)
+                    if(color.green() <= 15)
                     {
 
                         //then it's on red tape
@@ -65,15 +57,15 @@ public class frankTapeTest extends LinearOpMode {
             //testing for blue
 
             //if blue is almost full
-            else if (color.blue() >= 230)
+            else if (color.blue() >= (color.red() * 5))
             {
 
                 //if red is close to blank
-                if(color.red() <= 20)
+                if(color.red() <= 15)
                 {
 
                     //if green is close to blank
-                    if(color.green() <= 20)
+                    if(color.green() <= 15)
                     {
 
                         //then it's on blue tape
@@ -87,13 +79,13 @@ public class frankTapeTest extends LinearOpMode {
 
             //testing for white
 
-            else if(color.blue() >= 230)
+            else if(color.blue() >= 30)
             {
 
-                if(color.green() >= 230)
+                if(color.green() >= 30)
                 {
 
-                    if(color.red() >= 230)
+                    if(color.red() >= 30)
                     {
 
                         //then it's on white tape
@@ -113,6 +105,9 @@ public class frankTapeTest extends LinearOpMode {
             }
 
             //Add data to the telemetry
+            telemetry.addData("Green", color.green());
+            telemetry.addData("red", color.red());
+            telemetry.addData("blue", color.blue());
             telemetry.addData("Current Color Value", currentColorState);
             telemetry.addData("Color Value Key", "0 = grey; 1 = white; 2 = red; 3 = blue");
 
