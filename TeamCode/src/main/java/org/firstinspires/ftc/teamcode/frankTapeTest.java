@@ -112,6 +112,7 @@ public class frankTapeTest extends LinearOpMode {
                 currentColorState = 0;
             }
 
+            //Add data to the telemetry
             telemetry.addData("Current Color Value", currentColorState);
             telemetry.addData("Color Value Key", "0 = grey; 1 = white; 2 = red; 3 = blue");
 
