@@ -7,6 +7,13 @@ import com.qualcomm.robotcore.hardware.*;
 
 import java.util.concurrent.locks.Lock;
 
+/*
+
+Was trying to talk to 3rd party sensors -- Modern Robotics made this incredibly difficult
+so it doesn't work...
+
+ */
+
 @TeleOp
 @Disabled
 public class i2cTest extends LinearOpMode {

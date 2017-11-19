@@ -34,7 +34,7 @@ public class frankTapeTest extends LinearOpMode {
             //testing for if it's red
 
             //if red is almost full
-            if(color.red() >= (color.blue() * 5))
+            if(color.red() >= (color.blue() * 5)) // pls use && instead of a bunch of ifs
             {
 
                // if blue is close to blank

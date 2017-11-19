@@ -10,6 +10,12 @@ import com.qualcomm.robotcore.eventloop.opmode.*;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+/*
+
+This talks to the phone's accelerometer and reads out the data
+The phones we have don't have a gyroscope, which was probably intentional
+
+ */
 
 @TeleOp
 public class PositionTest extends LinearOpMode implements SensorEventListener {
@@ -45,7 +51,12 @@ public class PositionTest extends LinearOpMode implements SensorEventListener {
         waitForStart();
 
         while(opModeIsActive()) {
-
+            // Accelerometer values in m/s^2, need to have a calibration period where it takes a bunch of readings
+            // over a period of time and averages them, then offsets each reading by that much, and integrates it
+            // at a precise sample rate to (possibly) get a kinda crappy idea of the position of the robot...
+            // Hopefully it'll be good enough to get around in autonomous mode.
+            // Will likely have to use the Modern Robotics gyro too
+            // IDK why I'm using a bunch of single-line comments...
             telemetry.addData("X", vals[0]);
             telemetry.addData("Y", vals[1]);
             telemetry.addData("Z", vals[2]);

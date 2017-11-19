@@ -5,6 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+/*
+
+Just a quick thing to make the wheels go based on the triggers on the controller
+
+ */
 
 @TeleOp
 public class ChassisTest extends LinearOpMode {
