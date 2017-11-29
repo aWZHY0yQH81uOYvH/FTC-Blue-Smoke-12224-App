@@ -99,33 +99,8 @@ public class ChassisTest extends LinearOpMode {
                 fr.setPower(0.0);
             }
 
-            if(gamepad1.left_bumper)
-            {
-
-                isLeftReverse = true;
-
-            }
-
-            else
-            {
-
-                isLeftReverse = false;
-
-            }
-
-            if(gamepad1.right_bumper)
-            {
-
-                isRightReverse = true;
-
-            }
-
-            else
-            {
-
-                isRightReverse = false;
-
-            }
+            isLeftReverse = gamepad1.left_bumper;
+            isRightReverse = gamepad1.right_bumper;
 
 
             telemetry.update();
