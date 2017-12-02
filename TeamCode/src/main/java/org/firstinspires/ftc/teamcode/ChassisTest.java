@@ -136,7 +136,7 @@ public class ChassisTest extends LinearOpMode {
                 {
                     if(hm.getCurrentPosition() < 1080)
                     {
-                        hFloat = (0 + gamepad2.left_stick_x + hmOffset);
+                        hFloat = (0.5f * gamepad2.left_stick_x + hmOffset);
                         if(hFloat != hmOffset)
                         {
                             hm.setPower(hFloat);
