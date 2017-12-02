@@ -38,7 +38,7 @@ public class ChassisTest extends LinearOpMode {
         fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //Turret
-        DcMotor hm = hardwareMap.get(DcMotor.class, "hm");
+        DcMotor hm = hardwareMap.get(DcMotor.class, "turretHorizontal");
         hm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         float hFloat = 0;
@@ -74,7 +74,7 @@ public class ChassisTest extends LinearOpMode {
 
             //driving
 
-            if(gamepad1.left_trigger > 0.2)
+            if(gamepad1.left_trigger > 0.1)
             {
                 if(isLeftReverse)
                 {
@@ -107,16 +107,13 @@ public class ChassisTest extends LinearOpMode {
                     br.setPower(-(gamepad1.right_trigger) * (gamepad1.right_trigger));
                     fr.setPower(-(gamepad1.right_trigger) * (gamepad1.right_trigger));
                 }
-
                 else
                 {
-
                     br.setPower((gamepad1.right_trigger) * (gamepad1.right_trigger));
                     fr.setPower((gamepad1.right_trigger) * (gamepad1.right_trigger));
 
                 }
             }
-
             else
             {
                 br.setPower(0.0);
@@ -130,18 +127,18 @@ public class ChassisTest extends LinearOpMode {
             //hm.setTargetPosition(); //this is to set the position of the wrist horizontally
 
             //check if it's between the limits
-            if(hmSetupComplete)
-            {
-                if(hm.getCurrentPosition() > -1080)
+            if(hmSetupComplete) {
+                if (hm.getCurrentPosition() > -1080 && gamepad2.left_stick_x > 0)
                 {
-                    if(hm.getCurrentPosition() < 1080)
-                    {
-                        hFloat = (0.5f * gamepad2.left_stick_x + hmOffset);
-                        if(hFloat != hmOffset)
-                        {
-                            hm.setPower(hFloat);
-                        }
-                    }
+                    hm.setPower(0.5f * gamepad2.left_stick_x);
+                }
+                else if (hm.getCurrentPosition() < 1080 && gamepad2.left_stick_x < 0)
+                {
+                    hm.setPower(0.5f * gamepad2.left_stick_x);
+                }
+                else
+                {
+                    hm.setPower(0);
                 }
             }
 
