@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 /*
 
 Just a quick thing to make the wheels go based on the triggers on the controller
@@ -24,6 +26,7 @@ public class ChassisTest extends LinearOpMode {
         telemetry.addData("Status", "Initializing");
         telemetry.update();
 
+        //Chassis
         DcMotor bl, br, fl, fr;
         bl = hardwareMap.get(DcMotor.class, "bl");
         bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -34,8 +37,29 @@ public class ChassisTest extends LinearOpMode {
         fr = hardwareMap.get(DcMotor.class, "fr");
         fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        //Turret
+        DcMotor hm = hardwareMap.get(DcMotor.class, "hm");
+        hm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        float hFloat = 0;
+        int hmOffset = 0;
+
+        int hmPosition = 0;
+
+        //Booleans
         boolean isLeftReverse = false;
         boolean isRightReverse = false;
+        boolean hmSetupComplete = false;
+
+        //setup hm
+        hmOffset = hm.getCurrentPosition();
+        if(hmOffset > -1080)
+        {
+            if(hmOffset < 1080)
+            {
+                hmSetupComplete = true;
+            }
+        }
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -55,16 +79,16 @@ public class ChassisTest extends LinearOpMode {
                 if(isLeftReverse)
                 {
 
-                    bl.setPower(-(gamepad1.left_trigger) * (gamepad1.left_trigger));
-                    fl.setPower(-(gamepad1.left_trigger) * (gamepad1.left_trigger));
+                    bl.setPower((gamepad1.left_trigger) * (gamepad1.left_trigger));
+                    fl.setPower((gamepad1.left_trigger) * (gamepad1.left_trigger));
 
                 }
 
                 else
                 {
 
-                    bl.setPower((gamepad1.left_trigger) * (gamepad1.left_trigger));
-                    fl.setPower((gamepad1.left_trigger) * (gamepad1.left_trigger));
+                    bl.setPower(-(gamepad1.left_trigger) * (gamepad1.left_trigger));
+                    fl.setPower(-(gamepad1.left_trigger) * (gamepad1.left_trigger));
 
                 }
 
@@ -80,15 +104,15 @@ public class ChassisTest extends LinearOpMode {
             {
                 if(isRightReverse)
                 {
-                    br.setPower((-gamepad1.right_trigger) * (gamepad1.right_trigger));
-                    fr.setPower((-gamepad1.right_trigger) * (gamepad1.right_trigger));
+                    br.setPower(-(gamepad1.right_trigger) * (gamepad1.right_trigger));
+                    fr.setPower(-(gamepad1.right_trigger) * (gamepad1.right_trigger));
                 }
 
                 else
                 {
 
                     br.setPower((gamepad1.right_trigger) * (gamepad1.right_trigger));
-                    fr.setPower((gamepad1.right_trigger) * (gamepad1.left_trigger));
+                    fr.setPower((gamepad1.right_trigger) * (gamepad1.right_trigger));
 
                 }
             }
@@ -102,6 +126,29 @@ public class ChassisTest extends LinearOpMode {
             isLeftReverse = gamepad1.left_bumper;
             isRightReverse = gamepad1.right_bumper;
 
+            //tetrix = 1440 steps per revolution, 1-3, small is 40 teeth, so 120 on the big one
+            //hm.setTargetPosition(); //this is to set the position of the wrist horizontally
+
+            //check if it's between the limits
+            if(hmSetupComplete)
+            {
+                if(hm.getCurrentPosition() > -1080)
+                {
+                    if(hm.getCurrentPosition() < 1080)
+                    {
+                        hFloat = (0 + gamepad2.left_stick_x + hmOffset);
+                        if(hFloat != hmOffset)
+                        {
+                            hm.setPower(hFloat);
+                        }
+                    }
+                }
+            }
+
+
+            hmPosition = hm.getCurrentPosition();
+
+            telemetry.addData("hmPosition", hmPosition);
 
             telemetry.update();
         }
