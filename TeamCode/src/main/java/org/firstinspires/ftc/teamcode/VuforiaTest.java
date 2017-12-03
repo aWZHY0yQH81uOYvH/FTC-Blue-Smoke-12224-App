@@ -16,6 +16,7 @@ it's looking at (autonomous).
  */
 
 @TeleOp
+@Disabled
 public class VuforiaTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

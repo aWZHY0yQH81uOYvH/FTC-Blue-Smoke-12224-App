@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.*;
 
 
 @TeleOp
+@Disabled
 public class ColorTest extends LinearOpMode {
 
     @Override

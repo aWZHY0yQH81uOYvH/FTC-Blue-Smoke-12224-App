@@ -18,6 +18,7 @@ The phones we have don't have a gyroscope, which was probably intentional
  */
 
 @TeleOp
+@Disabled
 public class PositionTest extends LinearOpMode implements SensorEventListener {
 
     private float vals[]={0,0,0};

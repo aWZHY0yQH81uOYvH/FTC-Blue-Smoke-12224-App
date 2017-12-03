@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -14,6 +15,7 @@ Just a quick thing to make the wheels go based on the triggers on the controller
  */
 
 @TeleOp
+@Disabled
 public class ChassisTest extends LinearOpMode {
 
     private static int boolToInt(boolean in) {
@@ -38,7 +40,7 @@ public class ChassisTest extends LinearOpMode {
         fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //Turret
-        DcMotor hm = hardwareMap.get(DcMotor.class, "turretHorizontal");
+        DcMotor hm = hardwareMap.get(DcMotor.class, "horizontalTurret");
         hm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         float hFloat = 0;
@@ -79,16 +81,16 @@ public class ChassisTest extends LinearOpMode {
                 if(isLeftReverse)
                 {
 
-                    bl.setPower((gamepad1.left_trigger) * (gamepad1.left_trigger));
-                    fl.setPower((gamepad1.left_trigger) * (gamepad1.left_trigger));
+                    bl.setPower(Math.pow(gamepad1.left_trigger, 3));
+                    fl.setPower(Math.pow(gamepad1.left_trigger, 3));
 
                 }
 
                 else
                 {
 
-                    bl.setPower(-(gamepad1.left_trigger) * (gamepad1.left_trigger));
-                    fl.setPower(-(gamepad1.left_trigger) * (gamepad1.left_trigger));
+                    bl.setPower(-Math.pow(gamepad1.left_trigger, 3));
+                    fl.setPower(-Math.pow(gamepad1.left_trigger, 3));
 
                 }
 
@@ -104,13 +106,13 @@ public class ChassisTest extends LinearOpMode {
             {
                 if(isRightReverse)
                 {
-                    br.setPower(-(gamepad1.right_trigger) * (gamepad1.right_trigger));
-                    fr.setPower(-(gamepad1.right_trigger) * (gamepad1.right_trigger));
+                    br.setPower(-Math.pow(gamepad1.right_trigger, 3));
+                    fr.setPower(-Math.pow(gamepad1.right_trigger, 3));
                 }
                 else
                 {
-                    br.setPower((gamepad1.right_trigger) * (gamepad1.right_trigger));
-                    fr.setPower((gamepad1.right_trigger) * (gamepad1.right_trigger));
+                    br.setPower(Math.pow(gamepad1.right_trigger, 3));
+                    fr.setPower(Math.pow(gamepad1.right_trigger, 3));
 
                 }
             }
