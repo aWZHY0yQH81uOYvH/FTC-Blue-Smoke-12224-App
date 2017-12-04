@@ -73,10 +73,15 @@ public class ArmUtil {
         sleep(500);
         wristWinch.setPower(0);
 
+        // Close grabber
+        grabber.setPower(-1);
+        sleep(1000);
+        grabber.setPower(0);
+
         // Vertical first
         if(verticalLimit.isPressed()) return false;
         else {
-            verticalTurret.setPower(0.2);
+            verticalTurret.setPower(0.3);
             for(int x=0; x<500&&!verticalLimit.isPressed(); x++) sleep(10);
             if(!verticalLimit.isPressed()) return false;
             verticalTurret.setPower(0);
@@ -100,13 +105,13 @@ public class ArmUtil {
         // Vertical Wrist
         if(wristLimit.isPressed()) return false;
         else {
-            wristWinch.setPower(0.1);
+            wristWinch.setPower(0.25);
             for(int x=0; x<1000&&!wristLimit.isPressed(); x++) sleep(10);
             if(!wristLimit.isPressed()) return false;
             wristWinch.setPower(0);
         }
         winchOffset=wristWinch.getCurrentPosition()+WRIST_INIT;
-        winchToPosition(0, 0.25);
+        winchToPosition(0, 0.3);
 
         return true;
 
@@ -120,7 +125,10 @@ public class ArmUtil {
         intDeg=limit(intDeg, (actualHPos==0||actualHPos>=120)?VERTICAL_MIN:VERTICAL_MIN_OB, VERTICAL_MAX);
         vPos=intDeg;
         verticalTurret.setTargetPosition(intDeg*28+verticalOffset);
-        for(int x=0; x<500&&verticalTurret.isBusy(); x++) sleep(10);
+        //for(int x=0; x<500&&verticalTurret.isBusy(); x++) sleep(10);
+
+        sleep(1000); // DANGER
+
         return deg;
     }
 
@@ -131,7 +139,9 @@ public class ArmUtil {
         intDeg=limit(intDeg, HORIZONTAL_MIN, HORIZONTAL_MAX);
         hPos=intDeg;
         horizontalTurret.setTargetPosition(intDeg*12+horizontalOffset);
-        for(int x=0; x<500&&horizontalTurret.isBusy(); x++) sleep(10);
+        //for(int x=0; x<500&&horizontalTurret.isBusy(); x++) sleep(10);
+
+        sleep(1000); // DANGER
         return deg;
     }
 
@@ -205,7 +215,7 @@ public class ArmUtil {
             grabber.setPower(-power);
             grabOpening=true;
         } else if(grabOpening) {
-            sleep(250);
+            sleep(100);
             grabOpening=false;
         } else grabber.setPower(0);
     }
@@ -222,7 +232,7 @@ public class ArmUtil {
     }
 
     public static void stow() {
-        verticalToPosition(0, 0.25);
+        //verticalToPosition(0, 0.25);
         horizontalToPosition(0, 0.1);
         hWrist(0);
         grab(1);

@@ -40,7 +40,7 @@ public class FakeAutonomous extends LinearOpMode {
         ArmUtil.wristHorizontal=hardwareMap.get(Servo.class, "wristHorizontal");
         ArmUtil.grabber=hardwareMap.get(CRServo.class, "grabber");
 
-        if(!ArmUtil.armInit()) {
+        /*if(!ArmUtil.armInit()) {
             telemetry.addData("Status", "INIT ERROR");
             telemetry.update();
             sleep(1000);
@@ -54,7 +54,7 @@ public class FakeAutonomous extends LinearOpMode {
         ArmUtil.stop();
 
         telemetry.addData("Status", "Stowed");
-        telemetry.update();
+        telemetry.update();*/
 
         waitForStart();
 

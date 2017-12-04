@@ -66,6 +66,7 @@ public class DriverControl extends LinearOpMode {
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 userHWrist=ArmUtil.limitHWrist(userHWrist-Math.pow(gamepad1.right_stick_x, 5)/2.0);
+                ArmUtil.hWrist(-(int)userHWrist);
             }
         }, 0, 10); // 10ms
 
@@ -80,27 +81,30 @@ public class DriverControl extends LinearOpMode {
 
             if(gamepad1.left_stick_button) { // Center with joystick button
                 if(!zeroRegister) {
-                    if(ArmUtil.hPos==0) ArmUtil.verticalToPosition(0, 0.5);
-                    else ArmUtil.horizontalToPosition(0, 0.3);
+                    //if(ArmUtil.hPos==0) ArmUtil.verticalToPosition(0, 0.5);
+                    //else ArmUtil.horizontalToPosition(0, 0.3);
+
+                    ArmUtil.horizontalToPosition(0, 0.3);
+
                     zeroRegister=true;
                 }
             } else zeroRegister=false;
 
+            if(gamepad1.a) ArmUtil.horizontalSetPower(Math.pow(gamepad1.left_stick_x, 3)*0.3);
+            else ArmUtil.horizontalSetPower(Math.pow(gamepad1.left_stick_x, 3)*0.1); // Arm movement
+            ArmUtil.verticalSetPower(Math.pow(-gamepad1.left_stick_y, 3)*0.4);
 
-            ArmUtil.horizontalSetPower(Math.pow(gamepad1.left_stick_x, 3)*0.1); // Arm movement
-            ArmUtil.verticalSetPower(Math.pow(-gamepad1.left_stick_y, 5)*0.5);
 
-
-            if(gamepad1.right_stick_x!=0||gamepad1.right_stick_y!=0||gamepad1.right_stick_button) { // Reset stabilization
+            /*if(gamepad1.right_stick_x!=0||gamepad1.right_stick_y!=0||gamepad1.right_stick_button) { // Reset stabilization
                 lastHPos=ArmUtil.hPos;
                 lastVPos=ArmUtil.vPos;
                 stabilize=true;
             }
-            if(ArmUtil.hWrist((int)userHWrist-(stabilize?ArmUtil.hPos-lastHPos:0))) stabilize=false;
+            if(ArmUtil.hWrist((int)userHWrist-(stabilize?ArmUtil.hPos-lastHPos:0))) stabilize=false;*/
             if(gamepad1.right_stick_button) userHWrist=0;
 
 
-            ArmUtil.winchSetPower(Math.pow(-gamepad1.right_stick_y, 5)*0.25);
+            ArmUtil.winchSetPower(Math.pow(-gamepad1.right_stick_y, 3)*0.15);
 
 
 
@@ -114,14 +118,24 @@ public class DriverControl extends LinearOpMode {
 
 
             // Chassis
-            bl.setPower(-Math.pow(gamepad2.left_trigger*boolToInt(gamepad2.left_bumper), 3));
-            fl.setPower(-Math.pow(gamepad2.left_trigger*boolToInt(gamepad2.left_bumper), 3));
+            double leftPower=gamepad2.left_trigger;
+            double rightPower=gamepad2.right_trigger;
 
-            br.setPower(Math.pow(gamepad2.right_trigger*boolToInt(gamepad2.right_bumper), 3));
-            fr.setPower(Math.pow(gamepad2.right_trigger*boolToInt(gamepad2.right_bumper), 3));
+            if(Math.abs(leftPower-rightPower)<=0.2) {
+                leftPower+=rightPower;
+                leftPower/=2;
+                rightPower=leftPower;
+            }
+
+            bl.setPower(-Math.pow(leftPower, 2)*boolToInt(gamepad2.left_bumper));
+            fl.setPower(-Math.pow(leftPower, 2)*boolToInt(gamepad2.left_bumper));
+
+            br.setPower(Math.pow(rightPower, 2)*boolToInt(gamepad2.right_bumper));
+            fr.setPower(Math.pow(rightPower, 2)*boolToInt(gamepad2.right_bumper));
 
             telemetry.update();
         }
         ArmUtil.stop();
+        timer.cancel();
     }
 }
