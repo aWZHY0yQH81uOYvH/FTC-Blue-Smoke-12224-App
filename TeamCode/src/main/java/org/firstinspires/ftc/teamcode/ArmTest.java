@@ -15,7 +15,8 @@ import java.util.TimerTask;
 @TeleOp
 @Disabled
 public class ArmTest extends LinearOpMode {
-
+    public void runOpMode() throws InterruptedException {} // Hasn't been updated to use new ArmUtil
+/*
     private static int boolToInt(boolean in) {
         if(in) return -1;
         else return 1;
@@ -108,5 +109,5 @@ public class ArmTest extends LinearOpMode {
             telemetry.update();
         }
         ArmUtil.stop();
-    }
+    }*/
 }

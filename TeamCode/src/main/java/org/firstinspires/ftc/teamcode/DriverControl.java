@@ -1,11 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.telecom.TelecomManager;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,12 +22,17 @@ public class DriverControl extends LinearOpMode {
         else return 1;
     }
 
-    boolean zeroRegister=false, stabilize=true;
-    int crush=0, lastVPos=0, lastHPos=0;
+    boolean zeroRegister=false, stabilize=false, stabilizeRegister=false;
+    int crush=0, lastHPos=0;
     double userHWrist=0;
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        // ##################################################
+        // #                      INIT                      #
+        // ##################################################
+
         telemetry.addData("Status", "Initializing");
         telemetry.update();
 
@@ -40,37 +48,46 @@ public class DriverControl extends LinearOpMode {
         ArmUtil.grabber=hardwareMap.get(CRServo.class, "grabber");
 
         // Chassis
-        DcMotor bl, br, fl, fr;
-        bl = hardwareMap.get(DcMotor.class, "bl");
+        DcMotor bl=hardwareMap.get(DcMotor.class, "bl"), br=hardwareMap.get(DcMotor.class, "br"), fl=hardwareMap.get(DcMotor.class, "fl"), fr=hardwareMap.get(DcMotor.class, "fr");
         bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        br = hardwareMap.get(DcMotor.class, "br");
         br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fl = hardwareMap.get(DcMotor.class, "fl");
         fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fr = hardwareMap.get(DcMotor.class, "fr");
         fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        if(!ArmUtil.armInit()) {
-            telemetry.addData("Status", "INIT ERROR");
-            telemetry.update();
-            sleep(1000);
-            return;
-        }
+        // Variables
+        double lastLPower=0, lastRPower=0;
+
+        ArmUtil.armInit(); // Zero encoders and things
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         waitForStart();
 
+
+
+
+
+        // ##################################################
+        // #                      RUN                       #
+        // ##################################################
+
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                userHWrist=ArmUtil.limitHWrist(userHWrist-Math.pow(gamepad1.right_stick_x, 5)/2.0);
-                ArmUtil.hWrist(-(int)userHWrist);
+                userHWrist=ArmUtil.limitHWrist(userHWrist-gamepad1.right_stick_x);
             }
         }, 0, 10); // 10ms
 
+        //ElapsedTime runTime = new ElapsedTime();
+        //long times[]=new long[6];
+
         while(opModeIsActive()) {
+            //times[0]=runTime.nanoseconds();
             telemetry.addData("Vertical Pos", ArmUtil.vPos);
             telemetry.addData("Vertical Pow", ArmUtil.vPower);
             telemetry.addData("Horizontal Pos", ArmUtil.hPos);
@@ -79,34 +96,75 @@ public class DriverControl extends LinearOpMode {
             telemetry.addData("VWrist Pos", ArmUtil.winchPos);
             telemetry.addData("VWrist Pow", ArmUtil.winchPower);
 
+            //times[1]=runTime.nanoseconds();
+
+
+
+
+
+            // ##################################################
+            // #                      ARM                       #
+            // ##################################################
+
+            ArmUtil.updateHPos();
+            ArmUtil.updateVPos();
             if(gamepad1.left_stick_button) { // Center with joystick button
                 if(!zeroRegister) {
                     //if(ArmUtil.hPos==0) ArmUtil.verticalToPosition(0, 0.5);
                     //else ArmUtil.horizontalToPosition(0, 0.3);
 
-                    ArmUtil.horizontalToPosition(0, 0.3);
+                    ArmUtil.horizontalToPosition(0, 0.5);
 
                     zeroRegister=true;
                 }
             } else zeroRegister=false;
 
-            if(gamepad1.a) ArmUtil.horizontalSetPower(Math.pow(gamepad1.left_stick_x, 3)*0.3);
-            else ArmUtil.horizontalSetPower(Math.pow(gamepad1.left_stick_x, 3)*0.1); // Arm movement
-            ArmUtil.verticalSetPower(Math.pow(-gamepad1.left_stick_y, 3)*0.4);
+            if(gamepad1.a) ArmUtil.horizontalSetPower(gamepad1.left_stick_x*0.5);
+            else ArmUtil.horizontalSetPower(gamepad1.left_stick_x*0.25); // Arm movement
+            ArmUtil.verticalSetPower(-gamepad1.left_stick_y*0.5);
+
+            //times[2]=runTime.nanoseconds();
 
 
-            /*if(gamepad1.right_stick_x!=0||gamepad1.right_stick_y!=0||gamepad1.right_stick_button) { // Reset stabilization
+
+
+
+            // ##################################################
+            // #                     WRIST                      #
+            // ##################################################
+
+            ArmUtil.updateWinchPos();
+            if(gamepad1.b) {
+                if(!stabilizeRegister) {
+                    stabilize=!stabilize;
+                    if(!stabilize) {
+                        userHWrist+=ArmUtil.hPos-lastHPos;
+                        lastHPos=ArmUtil.hPos;
+                    }
+                    stabilizeRegister=true;
+                }
+            } else stabilizeRegister=false;
+            if(gamepad1.right_stick_x!=0||gamepad1.right_stick_y!=0||gamepad1.right_stick_button) { // Reset stabilization
                 lastHPos=ArmUtil.hPos;
-                lastVPos=ArmUtil.vPos;
-                stabilize=true;
             }
-            if(ArmUtil.hWrist((int)userHWrist-(stabilize?ArmUtil.hPos-lastHPos:0))) stabilize=false;*/
+            if(ArmUtil.hWrist(-(int)userHWrist-(stabilize?ArmUtil.hPos-lastHPos:0))) {
+                lastHPos=ArmUtil.hPos;
+                stabilize=false;
+            }
             if(gamepad1.right_stick_button) userHWrist=0;
 
 
-            ArmUtil.winchSetPower(Math.pow(-gamepad1.right_stick_y, 3)*0.15);
+            ArmUtil.winchSetPower(-gamepad1.right_stick_y*0.3);
+
+            //times[3]=runTime.nanoseconds();
 
 
+
+
+
+            // ##################################################
+            // #                    GRABBER                     #
+            // ##################################################
 
             if(gamepad1.left_bumper) crush=1; // Buttons make grabber stay closed or open
             if(gamepad1.right_bumper) crush=-1;
@@ -116,26 +174,69 @@ public class DriverControl extends LinearOpMode {
             else if(crush==-1) ArmUtil.grab(-1);
             else ArmUtil.grab(gamepad1.left_trigger-gamepad1.right_trigger);
 
+            //times[4]=runTime.nanoseconds();
 
-            // Chassis
-            double leftPower=gamepad2.left_trigger;
-            double rightPower=gamepad2.right_trigger;
 
-            if(Math.abs(leftPower-rightPower)<=0.2) {
-                leftPower+=rightPower;
-                leftPower/=2;
-                rightPower=leftPower;
+
+
+
+            // ##################################################
+            // #                    CHASSIS                     #
+            // ##################################################
+
+            double x=gamepad2.right_stick_x+0.2*gamepad2.left_stick_x, y=gamepad2.right_stick_y+0.2*gamepad2.left_stick_y;
+            double leftPower=gamepad2.left_trigger*boolToInt(gamepad2.left_bumper)*0.2, rightPower=gamepad2.right_trigger*boolToInt(gamepad2.right_bumper)*0.2;
+            if(gamepad2.a) {
+                y=0;
+                leftPower=rightPower;
+            }
+            double left=ArmUtil.limit(-y+x+leftPower, -1, 1)*0.75, right=ArmUtil.limit(-y-x+rightPower, -1, 1)*0.75;
+            if(Math.abs(lastLPower-left)>0.005) {
+                bl.setPower(-left);
+                fl.setPower(-left);
+                lastLPower=left;
+            }
+            if(Math.abs(lastRPower-right)>0.005) {
+                br.setPower(right);
+                fr.setPower(right);
+                lastRPower=right;
             }
 
-            bl.setPower(-Math.pow(leftPower, 2)*boolToInt(gamepad2.left_bumper));
-            fl.setPower(-Math.pow(leftPower, 2)*boolToInt(gamepad2.left_bumper));
+            // Old chassis control
+            //double leftPower=gamepad2.left_trigger;
+            //double rightPower=gamepad2.right_trigger;
 
-            br.setPower(Math.pow(rightPower, 2)*boolToInt(gamepad2.right_bumper));
-            fr.setPower(Math.pow(rightPower, 2)*boolToInt(gamepad2.right_bumper));
+            //if(Math.abs(leftPower-rightPower)<=0.2) {
+            //    leftPower+=rightPower;
+            //    leftPower/=2;
+            //    rightPower=leftPower;
+            //}
+
+            //bl.setPower(-Math.pow(leftPower, 2)*boolToInt(gamepad2.left_bumper));
+            //fl.setPower(-Math.pow(leftPower, 2)*boolToInt(gamepad2.left_bumper));
+            //br.setPower(Math.pow(rightPower, 2)*boolToInt(gamepad2.right_bumper));
+            //fr.setPower(Math.pow(rightPower, 2)*boolToInt(gamepad2.right_bumper));
+
+            //times[5]=runTime.nanoseconds();
+
+            //telemetry.addData("Telemetry Update/Loop", times[0]);
+            //telemetry.addData("Add Data", times[1]);
+            //telemetry.addData("Arm", times[2]);
+            //telemetry.addData("Wrist", times[3]);
+            //telemetry.addData("Grabber", times[4]);
+            //telemetry.addData("Chassis", times[5]);
+
+            //runTime.reset();
+            //ArmUtil.winchSetPower(0);
+            //telemetry.addData("winchSetPower", runTime.nanoseconds());
 
             telemetry.update();
         }
         ArmUtil.stop();
+        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         timer.cancel();
     }
 }
