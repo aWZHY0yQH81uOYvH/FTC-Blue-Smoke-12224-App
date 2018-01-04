@@ -31,7 +31,7 @@ public class ArmUtil {
     private static final int VERTICAL_INIT=45, VERTICAL_MIN_OB=-10, VERTICAL_MIN=-45, VERTICAL_MAX=45; // Degrees
     private static final int HORIZONTAL_MIN=-180, HORIZONTAL_MAX=90;
     private static final int VERTICAL_STEP=28, HORIZONTAL_STEP=12; // Conversion from steps to degrees
-    private static final int H_WRIST_RANGE=80, H_WRIST_OFFSET=0;
+    private static final int H_WRIST_RANGE=70, H_WRIST_OFFSET=0;
     private static final int WRIST_INIT=600, WRIST_MIN=-1500, WRIST_MAX=900; // Steps
 
 

@@ -1,14 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.telecom.TelecomManager;
-
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -22,7 +19,7 @@ public class DriverControl extends LinearOpMode {
         else return 1;
     }
 
-    boolean zeroRegister=false, stabilize=false, stabilizeRegister=false;
+    boolean zeroRegister=false, stabilize=false, stabilizeRegister=false, wristRotation=false, wristRotateRegister =false;
     int crush=0, lastHPos=0;
     double userHWrist=0;
 
@@ -57,6 +54,10 @@ public class DriverControl extends LinearOpMode {
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Wrist rotation
+        Servo wristRotate=hardwareMap.get(Servo.class, "wristRotate");
+        wristRotate.setPosition(0.6);
 
         // Variables
         double lastLPower=0, lastRPower=0;
@@ -153,6 +154,14 @@ public class DriverControl extends LinearOpMode {
             }
             if(gamepad1.right_stick_button) userHWrist=0;
 
+            if(gamepad1.x) {
+                if(!wristRotateRegister) {
+                    wristRotation=!wristRotation;
+                    if(wristRotation) wristRotate.setPosition(0);
+                    else wristRotate.setPosition(0.6);
+                    wristRotateRegister=true;
+                }
+            } else wristRotateRegister=false;
 
             ArmUtil.winchSetPower(-gamepad1.right_stick_y*0.3);
 
