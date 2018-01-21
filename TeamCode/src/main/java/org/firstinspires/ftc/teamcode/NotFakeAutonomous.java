@@ -59,6 +59,9 @@ public class NotFakeAutonomous extends LinearOpMode {
         Servo alArm=hardwareMap.get(Servo.class, "alArm");
         alArm.setPosition(0.04);
 
+        // used to determine which side the robot is on
+
+
         // Wrist rotation
         //Servo wristRotate=hardwareMap.get(Servo.class, "wristRotate");
         //wristRotate.setPosition(0.6);
@@ -73,6 +76,8 @@ public class NotFakeAutonomous extends LinearOpMode {
         // ##################################################
         // #                      RUN                       #
         // ##################################################
+
+
 
         // Jewel
         alArm.setPosition(0.7);
@@ -97,6 +102,38 @@ public class NotFakeAutonomous extends LinearOpMode {
         fr.setPower(0);
         alArm.setPosition(0.04);
 
+        // Safe Zone
+
+        //find which side the robot is on
+        if(bottomColorSensor.blue() >= (bottomColorSensor.red() * 5)) {
+
+            //move the robot from the blue side
+            //forwards
+            bl.setPower(0.25);
+            fl.setPower(0.25);
+            //invert the right side
+            br.setPower(-0.25);
+            fr.setPower(-0.25);
+
+
+        } else{
+
+            //move the robot from the red side
+            //backwards
+            bl.setPower(-0.25);
+            fl.setPower(-0.25);
+            //invert the right side
+            br.setPower(0.25);
+            fr.setPower(0.25);
+
+        }
+
+        //stop moving the robot
+        sleep(5000);
+        bl.setPower(0);
+        fl.setPower(0);
+        br.setPower(0);
+        fr.setPower(0);
 
 
         /*Timer timer = new Timer();
