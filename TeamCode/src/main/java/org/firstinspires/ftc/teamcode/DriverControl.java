@@ -19,7 +19,7 @@ public class DriverControl extends LinearOpMode {
         else return 1;
     }
 
-    boolean zeroRegister=false, stabilize=false, stabilizeRegister=false, wristRotation=false, wristRotateRegister =false;
+    boolean zeroRegister=false, stabilize=false, stabilizeRegister=false, wristRotation=false, wristRotateRegister=false;
     int crush=0, lastHPos=0;
     double userHWrist=0;
 
