@@ -37,6 +37,7 @@ public class DriverControl extends LinearOpMode {
         ArmUtil.horizontalTurret=hardwareMap.get(DcMotor.class, "horizontalTurret");
         ArmUtil.verticalTurret=hardwareMap.get(DcMotor.class, "verticalTurret");
         ArmUtil.wristWinch=hardwareMap.get(DcMotor.class, "wristWinch");
+        ArmUtil.extendoMotor=hardwareMap.get(DcMotor.class, "extendo");
         ArmUtil.horizontalLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "horizontalLimit");
         ArmUtil.verticalLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "verticalLimit");
         ArmUtil.wristLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "wristLimit");
@@ -54,6 +55,10 @@ public class DriverControl extends LinearOpMode {
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Al Arm
+        Servo alArm=hardwareMap.get(Servo.class, "alArm");
+        alArm.setPosition(0.04);
 
         // Wrist rotation
         Servo wristRotate=hardwareMap.get(Servo.class, "wristRotate");
@@ -109,6 +114,7 @@ public class DriverControl extends LinearOpMode {
 
             ArmUtil.updateHPos();
             ArmUtil.updateVPos();
+            ArmUtil.updateExtendoPos();
             if(gamepad1.left_stick_button) { // Center with joystick button
                 if(!zeroRegister) {
                     //if(ArmUtil.hPos==0) ArmUtil.verticalToPosition(0, 0.5);
@@ -123,6 +129,17 @@ public class DriverControl extends LinearOpMode {
             if(gamepad1.a) ArmUtil.horizontalSetPower(gamepad1.left_stick_x*0.5);
             else ArmUtil.horizontalSetPower(gamepad1.left_stick_x*0.25); // Arm movement
             ArmUtil.verticalSetPower(-gamepad1.left_stick_y*0.5);
+
+            if(gamepad1.dpad_up) { // SPOOKY UNTESTED
+                ArmUtil.extendoSetPower(1);
+                ArmUtil.limpWinch();
+            } else if(gamepad1.dpad_down) {
+                ArmUtil.extendoSetPower(-1);
+                ArmUtil.limpWinch();
+            } else {
+                ArmUtil.extendoSetPower(0);
+                ArmUtil.winchSetPower(-gamepad1.right_stick_y*0.3); // Move wrist only if arm isn't moving
+            }
 
             //times[2]=runTime.nanoseconds();
 
@@ -162,8 +179,6 @@ public class DriverControl extends LinearOpMode {
                     wristRotateRegister=true;
                 }
             } else wristRotateRegister=false;
-
-            ArmUtil.winchSetPower(-gamepad1.right_stick_y*0.3);
 
             //times[3]=runTime.nanoseconds();
 

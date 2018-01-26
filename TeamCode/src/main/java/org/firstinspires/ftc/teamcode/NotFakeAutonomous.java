@@ -31,6 +31,7 @@ public class NotFakeAutonomous extends LinearOpMode {
         ArmUtil.horizontalTurret=hardwareMap.get(DcMotor.class, "horizontalTurret");
         ArmUtil.verticalTurret=hardwareMap.get(DcMotor.class, "verticalTurret");
         ArmUtil.wristWinch=hardwareMap.get(DcMotor.class, "wristWinch");
+        ArmUtil.extendoMotor=hardwareMap.get(DcMotor.class, "extendo");
         ArmUtil.horizontalLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "horizontalLimit");
         ArmUtil.verticalLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "verticalLimit");
         ArmUtil.wristLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "wristLimit");
@@ -129,7 +130,7 @@ public class NotFakeAutonomous extends LinearOpMode {
         }
 
         //stop moving the robot
-        sleep(5000);
+        sleep(5000); // Should change this to stop when it sees the lines with the color sensor
         bl.setPower(0);
         fl.setPower(0);
         br.setPower(0);

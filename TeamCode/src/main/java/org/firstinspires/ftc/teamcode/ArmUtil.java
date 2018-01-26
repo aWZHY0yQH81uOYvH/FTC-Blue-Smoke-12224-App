@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsTouchSensor;
+import com.qualcomm.hardware.motors.NeveRest3_7GearmotorV1;
 import com.qualcomm.hardware.motors.NeveRest60Gearmotor;
 import com.qualcomm.hardware.motors.TetrixMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -16,21 +17,22 @@ public class ArmUtil {
     // ##################################################
 
     // Motors and sensors
-    public static DcMotor horizontalTurret, verticalTurret, wristWinch;
+    public static DcMotor horizontalTurret, verticalTurret, wristWinch, extendoMotor;
     public static ModernRoboticsTouchSensor horizontalLimit, verticalLimit, wristLimit, grabberLimit;
     public static Servo wristHorizontal;
     public static CRServo grabber;
 
-    private static int horizontalOffset=0, verticalOffset=0, winchOffset=0; // Encoder offsets
+    private static int horizontalOffset=0, verticalOffset=0, winchOffset=0, extendoOffset=0; // Encoder offsets
 
     // Powers and positions of all motors
-    public static double hPower=0, vPower=0, winchPower=0;
-    public static int hPos=0, vPos=0, winchPos=0;
+    public static double hPower=0, vPower=0, winchPower=0, extendoPower=0;
+    public static int hPos=0, vPos=0, winchPos=0, extendoPos=0;
 
     // Constants
     private static final int VERTICAL_INIT=45, VERTICAL_MIN_OB=-10, VERTICAL_MIN=-45, VERTICAL_MAX=45; // Degrees
     private static final int HORIZONTAL_MIN=-180, HORIZONTAL_MAX=90;
     private static final int VERTICAL_STEP=28, HORIZONTAL_STEP=12; // Conversion from steps to degrees
+    private static final int EXTENDO_MAX=32445; // 15 inches
     private static final int H_WRIST_RANGE=70, H_WRIST_OFFSET=0;
     private static final int WRIST_INIT=600, WRIST_MIN=-1500, WRIST_MAX=900; // Steps
 
@@ -76,24 +78,30 @@ public class ArmUtil {
         horizontalTurret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         verticalTurret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         wristWinch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        extendoMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Run at constant speed
         horizontalTurret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         verticalTurret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         wristWinch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        extendoMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // Make directions logical
         horizontalTurret.setDirection(DcMotorSimple.Direction.REVERSE);
         verticalTurret.setDirection(DcMotorSimple.Direction.REVERSE);
         wristWinch.setDirection(DcMotorSimple.Direction.FORWARD);
+        extendoMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         grabber.setDirection(CRServo.Direction.FORWARD);
         // Ensure encoders are scaled correctly
         //horizontalTurret.setMotorType(MotorConfigurationType.getMotorType(TetrixMotor.class)); // Need to use custom PID values (changed D to 250)
         verticalTurret.setMotorType(MotorConfigurationType.getMotorType(NeveRest60Gearmotor.class));
         wristWinch.setMotorType(MotorConfigurationType.getMotorType(TetrixMotor.class));
+        extendoMotor.setMotorType(MotorConfigurationType.getMotorType(NeveRest3_7GearmotorV1.class));
+
 
         wristHorizontal.setPosition(0.5); // Center wrist servo
 
         verticalOffset=verticalTurret.getCurrentPosition()+VERTICAL_INIT*VERTICAL_STEP; // Get zeros for arm
         horizontalOffset=horizontalTurret.getCurrentPosition();
+        extendoOffset=extendoMotor.getCurrentPosition();
 
         verticalToPosition(0, 1); // Bring arm up
 
@@ -224,6 +232,31 @@ public class ArmUtil {
 
 
     // ##################################################
+    // #                 EXTENDO MOTOR                  #
+    // ##################################################
+
+    private static double extendoLastPower=0;
+
+    public static void extendoSetPower(double power) { // Extendo constant speed
+
+        if((extendoPos<0&&power>0)||(extendoPos<=EXTENDO_MAX&&extendoPos>=0)||(extendoPos>EXTENDO_MAX&&power<0)) extendoPower=power; // Allow arm to be brought back from extremes
+        else extendoPower=0;
+
+        if(Math.abs(extendoLastPower-extendoPower)>0.0025) { // Only update speed if there's a difference
+            extendoMotor.setPower(extendoPower);
+            extendoLastPower=extendoPower;
+        }
+    }
+
+    public static void updateExtendoPos() { // Get degrees of horizontal motor
+        extendoPos=extendoMotor.getCurrentPosition()-extendoOffset;
+    }
+
+
+
+
+
+    // ##################################################
     // #                  WRIST WINCH                   #
     // ##################################################
 
@@ -244,8 +277,10 @@ public class ArmUtil {
     public static void winchSetPower(double power) { // Winch constant power
         // Assuming winchPos has already been updated
 
-        if((winchPos<WRIST_MIN&&power>0)||(winchPos<=WRIST_MAX&&winchPos>=WRIST_MIN)||(winchPos>WRIST_MAX&&power<0)) winchPower=power;
-        else winchPower=0;
+        //if((winchPos<WRIST_MIN&&power>0)||(winchPos<=WRIST_MAX&&winchPos>=WRIST_MIN)||(winchPos>WRIST_MAX&&power<0)) winchPower=power;
+        //else winchPower=0;
+
+        winchPower=power; // TODO REMOVE DANGER
 
         if(Math.abs(winchPower)<0.005) { // Lock motor if power is low
             if(!winchLocked) { // Only send commands once
@@ -257,6 +292,7 @@ public class ArmUtil {
         } else {
             if(winchLocked) {
                 wristWinch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                wristWinch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 winchLocked=false;
             }
             if(Math.abs(winchLastPow-winchPower)>0.005) { // Only update speed if there's a difference
@@ -264,6 +300,12 @@ public class ArmUtil {
                 winchLastPow=winchPower;
             }
         }
+    }
+
+    public static void limpWinch() {
+        wristWinch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        wristWinch.setPower(0);
+        winchLocked=true;
     }
 
     public static void updateWinchPos() {
