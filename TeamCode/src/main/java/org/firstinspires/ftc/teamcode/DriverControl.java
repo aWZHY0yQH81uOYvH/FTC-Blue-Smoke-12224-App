@@ -147,11 +147,13 @@ public class DriverControl extends LinearOpMode {
             if(gamepad1.dpad_up) {
                 if (!armIsMoving) {
                     ArmUtil.extendoSetPower(1);
+                    ArmUtil.winchSetPower(0.5);
                     armIsMoving=true;
                 }
             } else if(gamepad1.dpad_down) {
                 if (!armIsMoving) {
-                    ArmUtil.extendoSetPower(1);
+                    ArmUtil.extendoSetPower(-1);
+                    ArmUtil.winchSetPower(0.5);
                     armIsMoving = true;
                 }
             } else {
