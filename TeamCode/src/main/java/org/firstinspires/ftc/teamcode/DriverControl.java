@@ -19,7 +19,7 @@ public class DriverControl extends LinearOpMode {
         else return 1;
     }
 
-    boolean zeroRegister=false, stabilize=false, stabilizeRegister=false, wristRotation=false, wristRotateRegister=false;
+    boolean zeroRegister=false, stabilize=false, stabilizeRegister=false, wristRotation=false, wristRotateRegister=false, armIsMoving=false;
     int crush=0, lastHPos=0;
     double userHWrist=0;
 
@@ -86,6 +86,20 @@ public class DriverControl extends LinearOpMode {
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 userHWrist=ArmUtil.limitHWrist(userHWrist-gamepad1.right_stick_x);
+
+                //wrist extendo management
+                /*
+                    U     U  N     N  TTTTTTT  EEEEEEE   SSSSS   TTTTTTT  EEEEEEE  DDDDDD
+                    U     U  NN    N     T     E        S     S     T     E        D     D
+                    U     U  N N   N     T     E        S           T     E        D     D
+                    U     U  N  N  N     T     EEEEEEE   SSSSS      T     EEEEEEE  D     D
+                    U     U  N   N N     T     E              S     T     E        D     D
+                    U     U  N    NN     T     E        S     S     T     E        D     D
+                     UUUUU   N     N     T     EEEEEEE   SSSSS      T     EEEEEEE  DDDDDD
+                */
+                if (armIsMoving) {
+                    ArmUtil.manageWinchExtendo();
+                }
             }
         }, 0, 10); // 10ms
 
@@ -130,16 +144,22 @@ public class DriverControl extends LinearOpMode {
             else ArmUtil.horizontalSetPower(gamepad1.left_stick_x*0.25); // Arm movement
             ArmUtil.verticalSetPower(-gamepad1.left_stick_y*0.5);
 
-            if(gamepad1.dpad_up) { // SPOOKY UNTESTED
-                ArmUtil.extendoSetPower(1);
-                ArmUtil.limpWinch();
+            if(gamepad1.dpad_up) {
+                if (!armIsMoving) {
+                    ArmUtil.extendoSetPower(1);
+                    armIsMoving=true;
+                }
             } else if(gamepad1.dpad_down) {
-                ArmUtil.extendoSetPower(-1);
-                ArmUtil.limpWinch();
+                if (!armIsMoving) {
+                    ArmUtil.extendoSetPower(1);
+                    armIsMoving = true;
+                }
             } else {
                 ArmUtil.extendoSetPower(0);
                 ArmUtil.winchSetPower(-gamepad1.right_stick_y*0.3); // Move wrist only if arm isn't moving
+                if (armIsMoving) armIsMoving=false;
             }
+
 
             //times[2]=runTime.nanoseconds();
 
@@ -152,6 +172,7 @@ public class DriverControl extends LinearOpMode {
             // ##################################################
 
             ArmUtil.updateWinchPos();
+            // press b to stabilize wrist horizontal angle
             if(gamepad1.b) {
                 if(!stabilizeRegister) {
                     stabilize=!stabilize;

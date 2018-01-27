@@ -10,6 +10,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.configuration.MotorConfigurationType;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class ArmUtil {
 
     // ##################################################
@@ -33,6 +36,7 @@ public class ArmUtil {
     private static final int HORIZONTAL_MIN=-180, HORIZONTAL_MAX=90;
     private static final int VERTICAL_STEP=28, HORIZONTAL_STEP=12; // Conversion from steps to degrees
     private static final int EXTENDO_MAX=32445; // 15 inches
+    private static final int WINCH_EXTENDO = 3;
     private static final int H_WRIST_RANGE=70, H_WRIST_OFFSET=0;
     private static final int WRIST_INIT=600, WRIST_MIN=-1500, WRIST_MAX=900; // Steps
 
@@ -308,9 +312,31 @@ public class ArmUtil {
         winchLocked=true;
     }
 
-    public static void updateWinchPos() {
-        winchPos=wristWinch.getCurrentPosition()-winchOffset;
+    /*
+            U     U  N     N  TTTTTTT  EEEEEEE   SSSSS   TTTTTTT  EEEEEEE  DDDDDD
+            U     U  NN    N     T     E        S     S     T     E        D     D
+            U     U  N N   N     T     E        S           T     E        D     D
+            U     U  N  N  N     T     EEEEEEE   SSSSS      T     EEEEEEE  D     D
+            U     U  N   N N     T     E              S     T     E        D     D
+            U     U  N    NN     T     E        S     S     T     E        D     D
+             UUUUU   N     N     T     EEEEEEE   SSSSS      T     EEEEEEE  DDDDDD
+    */
+
+    //TODO get extension constant that roughly satisfies this
+    // must extend slightly faster than arm, so that the limit switch can monitor up-down motion
+    private static final double EXTENDO_ROTATION_SPEED = 0.4;
+
+    public static void manageWinchExtendo() {
+        if (wristLimit.isPressed()) {
+            winchPower*=0.995; //1s of pressing: 0.6058x motor speed
+            winchSetPower(winchPower);
+        } else {
+            winchPower*=1.005; //1s of !pressing: 1.6466x motor speed
+            winchSetPower(winchPower);
+        }
     }
+
+    public static void updateWinchPos() { winchPos=wristWinch.getCurrentPosition()-winchOffset; }
 
 
 
