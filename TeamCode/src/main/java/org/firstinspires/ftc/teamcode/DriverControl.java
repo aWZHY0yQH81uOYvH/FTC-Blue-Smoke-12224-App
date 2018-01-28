@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -44,6 +45,7 @@ public class DriverControl extends LinearOpMode {
         ArmUtil.grabberLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "grabberLimit");
         ArmUtil.wristHorizontal=hardwareMap.get(Servo.class, "wristHorizontal");
         ArmUtil.grabber=hardwareMap.get(CRServo.class, "grabber");
+        ArmUtil.lengthSensor=hardwareMap.get(AnalogInput.class, "lengthSensor");
 
         // Chassis
         DcMotor bl=hardwareMap.get(DcMotor.class, "bl"), br=hardwareMap.get(DcMotor.class, "br"), fl=hardwareMap.get(DcMotor.class, "fl"), fr=hardwareMap.get(DcMotor.class, "fr");
@@ -120,7 +122,7 @@ public class DriverControl extends LinearOpMode {
                     //if(ArmUtil.hPos==0) ArmUtil.verticalToPosition(0, 0.5);
                     //else ArmUtil.horizontalToPosition(0, 0.3);
 
-                    ArmUtil.horizontalToPosition(0, 0.5);
+                    ArmUtil.horizontalToPosition(0, 0.1);
 
                     zeroRegister=true;
                 }
@@ -128,18 +130,21 @@ public class DriverControl extends LinearOpMode {
 
             if(gamepad1.a) ArmUtil.horizontalSetPower(gamepad1.left_stick_x*0.5);
             else ArmUtil.horizontalSetPower(gamepad1.left_stick_x*0.25); // Arm movement
+
             ArmUtil.verticalSetPower(-gamepad1.left_stick_y*0.5);
 
-            if(gamepad1.dpad_up) { // SPOOKY UNTESTED
+            if(gamepad1.dpad_up) {
                 ArmUtil.extendoSetPower(1);
-                ArmUtil.limpWinch();
+                //ArmUtil.maintainWristWinch();
             } else if(gamepad1.dpad_down) {
                 ArmUtil.extendoSetPower(-1);
-                ArmUtil.limpWinch();
+                //ArmUtil.maintainWristWinch();
             } else {
                 ArmUtil.extendoSetPower(0);
-                ArmUtil.winchSetPower(-gamepad1.right_stick_y*0.3); // Move wrist only if arm isn't moving
+
             }
+
+            ArmUtil.winchSetPower(-gamepad1.right_stick_y*0.3); // Move wrist only if arm isn't moving
 
             //times[2]=runTime.nanoseconds();
 

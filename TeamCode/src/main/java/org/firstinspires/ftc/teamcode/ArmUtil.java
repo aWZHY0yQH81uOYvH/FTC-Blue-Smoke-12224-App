@@ -4,11 +4,14 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsTouchSensor;
 import com.qualcomm.hardware.motors.NeveRest3_7GearmotorV1;
 import com.qualcomm.hardware.motors.NeveRest60Gearmotor;
 import com.qualcomm.hardware.motors.TetrixMotor;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.configuration.MotorConfigurationType;
+
+import java.util.Arrays;
 
 public class ArmUtil {
 
@@ -21,12 +24,14 @@ public class ArmUtil {
     public static ModernRoboticsTouchSensor horizontalLimit, verticalLimit, wristLimit, grabberLimit;
     public static Servo wristHorizontal;
     public static CRServo grabber;
+    public static AnalogInput lengthSensor;
 
     private static int horizontalOffset=0, verticalOffset=0, winchOffset=0, extendoOffset=0; // Encoder offsets
 
     // Powers and positions of all motors
     public static double hPower=0, vPower=0, winchPower=0, extendoPower=0;
     public static int hPos=0, vPos=0, winchPos=0, extendoPos=0;
+    private static double vPosD=0;
 
     // Constants
     private static final int VERTICAL_INIT=45, VERTICAL_MIN_OB=-10, VERTICAL_MIN=-45, VERTICAL_MAX=45; // Degrees
@@ -83,12 +88,12 @@ public class ArmUtil {
         horizontalTurret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         verticalTurret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         wristWinch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        extendoMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        extendoMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // Make directions logical
         horizontalTurret.setDirection(DcMotorSimple.Direction.REVERSE);
         verticalTurret.setDirection(DcMotorSimple.Direction.REVERSE);
         wristWinch.setDirection(DcMotorSimple.Direction.FORWARD);
-        extendoMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        extendoMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         grabber.setDirection(CRServo.Direction.FORWARD);
         // Ensure encoders are scaled correctly
         //horizontalTurret.setMotorType(MotorConfigurationType.getMotorType(TetrixMotor.class)); // Need to use custom PID values (changed D to 250)
@@ -117,9 +122,12 @@ public class ArmUtil {
         verticalTurret.setPower(0);
         horizontalTurret.setPower(0);
         wristWinch.setPower(0);
+        extendoMotor.setPower(0);
         verticalTurret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         horizontalTurret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         wristWinch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        extendoMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        winchLocked=false;
     }
 
 
@@ -174,7 +182,8 @@ public class ArmUtil {
     }
 
     public static void updateVPos() { // Get degrees of vertical motor
-        vPos=(verticalTurret.getCurrentPosition()-verticalOffset)/VERTICAL_STEP;
+        vPosD=((double)verticalTurret.getCurrentPosition()-verticalOffset)/VERTICAL_STEP;
+        vPos=(int)vPosD;
     }
 
 
@@ -190,7 +199,9 @@ public class ArmUtil {
 
     public static void horizontalToPosition(int deg, double power) { // Horizontal to set angle
         horizontalTurret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        hLocked=true;
         horizontalTurret.setPower(power);
+        hLastPow=power;
         deg=limit(deg, HORIZONTAL_MIN, HORIZONTAL_MAX);
         hPos=deg;
         deg=deg*12+horizontalOffset;
@@ -204,14 +215,14 @@ public class ArmUtil {
         if(((hPos<HORIZONTAL_MIN&&power>0)||(hPos<=HORIZONTAL_MAX&&hPos>=HORIZONTAL_MIN)||(hPos>HORIZONTAL_MAX&&power<0))&&(hPos!=0||vPos>=VERTICAL_MIN_OB)) hPower=power; // Allow arm to be brought back from extremes
         else hPower=0;
 
-        if(Math.abs(hPower)<0.0025) { // Lock motor if power is low
-            if(!hLocked) { // Only send commands once
-                horizontalTurret.setTargetPosition(horizontalTurret.getCurrentPosition());
-                horizontalTurret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                horizontalTurret.setPower(0.1);
-                hLocked=true;
-            }
-        } else {
+        //if(Math.abs(hPower)<0.0025) { // Lock motor if power is low
+        //    if(!hLocked) { // Only send commands once
+        //        horizontalTurret.setTargetPosition(horizontalTurret.getCurrentPosition());
+        //        horizontalTurret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //        horizontalTurret.setPower(0.1);
+        //        hLocked=true;
+        //    }
+        //} else {
             if(hLocked) {
                 horizontalTurret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 hLocked=false;
@@ -220,7 +231,7 @@ public class ArmUtil {
                 horizontalTurret.setPower(hPower);
                 hLastPow=hPower;
             }
-        }
+        //}
     }
 
     public static void updateHPos() { // Get degrees of horizontal motor
@@ -261,17 +272,26 @@ public class ArmUtil {
     // ##################################################
 
     private static boolean winchLocked=false;
-    private static double winchLastPow=0;
+    private static double winchLastPow=0, winchLastPos=0;
+    //private static int winchLastExtend=0, winchExtendOffset=0;
 
-    // TODO Never use winchToPosition?
     public static void winchToPosition(int steps, double power) { // Winch to set angle
-        wristWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        wristWinch.setPower(power);
-        steps=limit(steps, WRIST_MIN, WRIST_MAX);
+        if(!winchLocked) {
+            wristWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            winchLocked=true;
+        }
+        if(Math.abs(winchLastPow-power)>0.005) {
+            wristWinch.setPower(power);
+            winchLastPow=power;
+        }
+        //steps=limit(steps, WRIST_MIN, WRIST_MAX);
         winchPos=steps;
         steps+=winchOffset;
-        wristWinch.setTargetPosition(steps);
-        for(int x=0; x<1000&&Math.abs(wristWinch.getCurrentPosition()-steps)>=50; x++) sleep(10);
+        if(Math.abs(winchLastPos-winchPos)>5) {
+            wristWinch.setTargetPosition(steps);
+            winchLastPos=winchPos;
+        }
+        //for(int x=0; x<1000&&Math.abs(wristWinch.getCurrentPosition()-steps)>=50; x++) sleep(10);
     }
 
     public static void winchSetPower(double power) { // Winch constant power
@@ -280,19 +300,21 @@ public class ArmUtil {
         //if((winchPos<WRIST_MIN&&power>0)||(winchPos<=WRIST_MAX&&winchPos>=WRIST_MIN)||(winchPos>WRIST_MAX&&power<0)) winchPower=power;
         //else winchPower=0;
 
-        winchPower=power; // TODO REMOVE DANGER
+        winchPower=power;
 
         if(Math.abs(winchPower)<0.005) { // Lock motor if power is low
             if(!winchLocked) { // Only send commands once
-                wristWinch.setTargetPosition(wristWinch.getCurrentPosition());
+                winchLastPos=wristWinch.getCurrentPosition();
+                wristWinch.setTargetPosition((int)winchLastPos);
                 wristWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                wristWinch.setPower(0.01);
+                wristWinch.setPower(0.25);
                 winchLocked=true;
             }
         } else {
             if(winchLocked) {
                 wristWinch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 wristWinch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                wristWinch.setPower(0);
                 winchLocked=false;
             }
             if(Math.abs(winchLastPow-winchPower)>0.005) { // Only update speed if there's a difference
@@ -300,12 +322,26 @@ public class ArmUtil {
                 winchLastPow=winchPower;
             }
         }
+        //winchExtendOffset=winchLastExtend-winchPos;
     }
 
-    public static void limpWinch() {
-        wristWinch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        wristWinch.setPower(0);
-        winchLocked=true;
+    public static double vAverage[]=new double[10];
+
+    public static void maintainWristWinch() {
+        double v=0;
+        for(int x=0; x<9; x++) {
+            v+=vAverage[x];
+            vAverage[x]=vAverage[x+1];
+        }
+        vAverage[9]=lengthSensor.getVoltage();
+        v+=vAverage[9];
+        v/=10;
+        double sensorLength=(-28.1*v+170.0893)/v;
+        double angle=Math.toRadians(vPosD);
+        double string=(0.75+Math.cos(-angle+Math.asin((2.5-Math.tan(angle)*1.5)/sensorLength))*sensorLength+Math.sin(angle)*1.25)/Math.cos(angle);
+        double steps=(string-19)/2.51327*-1440;//-winchExtendOffset;//(-0.0753982+Math.sqrt(Math.max(0, 0.005684892-4*(-string+19))))/2*-1440;
+        //winchLastExtend=(int)steps;
+        winchToPosition((int)steps, 0.5);
     }
 
     public static void updateWinchPos() {
