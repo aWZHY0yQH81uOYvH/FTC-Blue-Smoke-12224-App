@@ -1,22 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 
 @Autonomous
-public class NotFakeAutonomous extends LinearOpMode {
+public class NotFakeAutonomousReverse extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -115,12 +110,12 @@ public class NotFakeAutonomous extends LinearOpMode {
 
         // Safe Zone
 
-        //forwards
-        bl.setPower(-0.25);
-        fl.setPower(-0.25);
+        //backwards
+        bl.setPower(0.25);
+        fl.setPower(0.25);
         //invert the right side
-        br.setPower(0.25);
-        fr.setPower(0.25);
+        br.setPower(-0.25);
+        fr.setPower(-0.25);
 
         sleep(500);
         for(int x=0; x<300&&Math.abs(bottomColorSensor.red()-bottomColorSensor.green())+Math.abs(bottomColorSensor.blue()-bottomColorSensor.green())<3; x++) sleep(10);

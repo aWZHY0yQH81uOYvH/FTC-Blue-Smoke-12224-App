@@ -60,24 +60,23 @@ public class DriverControl extends LinearOpMode {
 
         // Al Arm
         Servo alArm=hardwareMap.get(Servo.class, "alArm");
-        alArm.setPosition(0.04);
 
         // Wrist rotation
         Servo wristRotate=hardwareMap.get(Servo.class, "wristRotate");
-        wristRotate.setPosition(0.6);
 
         // Variables
         double lastLPower=0, lastRPower=0;
-
-        ArmUtil.armInit(); // Zero encoders and things
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         waitForStart();
 
+        alArm.setPosition(0.04);
 
+        wristRotate.setPosition(0.6);
 
+        ArmUtil.armInit(); // Zero encoders and things
 
 
         // ##################################################
@@ -213,7 +212,7 @@ public class DriverControl extends LinearOpMode {
             // #                    CHASSIS                     #
             // ##################################################
 
-            double x=gamepad2.right_stick_x+0.2*gamepad2.left_stick_x, y=gamepad2.right_stick_y+0.2*gamepad2.left_stick_y;
+            double x=gamepad2.right_stick_x+0.4*gamepad2.left_stick_x, y=gamepad2.right_stick_y+0.2*gamepad2.left_stick_y;
             double leftPower=gamepad2.left_trigger*boolToInt(gamepad2.left_bumper)*0.2, rightPower=gamepad2.right_trigger*boolToInt(gamepad2.right_bumper)*0.2;
             if(gamepad2.a) {
                 y=0;

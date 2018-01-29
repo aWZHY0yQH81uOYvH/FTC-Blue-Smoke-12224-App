@@ -110,12 +110,12 @@ public class ArmUtil {
 
         verticalToPosition(0, 1); // Bring arm up
 
-        wristWinch.setPower(1); // Pull winch up quickly
+        /*wristWinch.setPower(1); // Pull winch up quickly
         for(int x=0; x<100&&!wristLimit.isPressed(); x++) sleep(10);
         wristWinch.setPower(-0.25); // Release slowly until it drops off the switch
         for(int x=0; x<100&&wristLimit.isPressed(); x++) sleep(10);
         wristWinch.setPower(0);
-        winchOffset=wristWinch.getCurrentPosition()+WRIST_INIT; // Capture 0
+        winchOffset=wristWinch.getCurrentPosition()+WRIST_INIT; // Capture 0*/
     }
 
     public static void stop() { // Stops movement of everything

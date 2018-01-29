@@ -1,22 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 
 @Autonomous
-public class NotFakeAutonomous extends LinearOpMode {
+public class NotFakeAutonomousJewel extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -77,66 +72,42 @@ public class NotFakeAutonomous extends LinearOpMode {
 
         wristRotate.setPosition(0.6);
 
-        ArmUtil.armInit(); // Zero encoders and things
-
 
         // Jewel
         alArm.setPosition(0.7);
-        sleep(1000);
-        if((bottomColorSensor.red()>bottomColorSensor.blue())==(alSensor.red()>alSensor.blue())) { // Clockwise
-            telemetry.addData("Color", "Clockwise");
-            bl.setPower(-0.25);
-            fl.setPower(-0.25);
-            br.setPower(-0.25);
-            fr.setPower(-0.25);
+        sleep(1000); // TODO put these changes in the other ones
+        if(alSensor.red()!=alSensor.blue()) {
+            if((bottomColorSensor.red()>bottomColorSensor.blue())==(alSensor.red()>alSensor.blue())) { // Clockwise
+                telemetry.addData("Color", "Clockwise");
+                bl.setPower(-0.25);
+                fl.setPower(-0.25);
+                br.setPower(-0.25);
+                fr.setPower(-0.25);
+                sleep(500);
+                bl.setPower(0.25);
+                fl.setPower(0.25);
+                br.setPower(0.25);
+                fr.setPower(0.25);
+            } else { // Counterclockwise
+                telemetry.addData("Color", "Counterclockwise");
+                bl.setPower(0.25);
+                fl.setPower(0.25);
+                br.setPower(0.25);
+                fr.setPower(0.25);
+                sleep(500);
+                bl.setPower(-0.25);
+                fl.setPower(-0.25);
+                br.setPower(-0.25);
+                fr.setPower(-0.25);
+            }
             sleep(500);
-            bl.setPower(0.25);
-            fl.setPower(0.25);
-            br.setPower(0.25);
-            fr.setPower(0.25);
-        } else { // Counterclockwise
-            telemetry.addData("Color", "Counterclockwise");
-            bl.setPower(0.25);
-            fl.setPower(0.25);
-            br.setPower(0.25);
-            fr.setPower(0.25);
-            sleep(500);
-            bl.setPower(-0.25);
-            fl.setPower(-0.25);
-            br.setPower(-0.25);
-            fr.setPower(-0.25);
+            bl.setPower(0);
+            fl.setPower(0);
+            br.setPower(0);
+            fr.setPower(0);
         }
-        sleep(500);
-        bl.setPower(0);
-        fl.setPower(0);
-        br.setPower(0);
-        fr.setPower(0);
         alArm.setPosition(0.04);
 
-        // Safe Zone
-
-        //forwards
-        bl.setPower(-0.25);
-        fl.setPower(-0.25);
-        //invert the right side
-        br.setPower(0.25);
-        fr.setPower(0.25);
-
-        sleep(500);
-        for(int x=0; x<300&&Math.abs(bottomColorSensor.red()-bottomColorSensor.green())+Math.abs(bottomColorSensor.blue()-bottomColorSensor.green())<3; x++) sleep(10);
-
-        //stop moving the robot
-        bl.setPower(0);
-        fl.setPower(0);
-        br.setPower(0);
-        fr.setPower(0);
-
-        sleep(1000);
-
-        // Get arm ready for teleop
-        ArmUtil.horizontalToPosition(0, 0.5);
-        ArmUtil.verticalToPosition(-45, 0.1);
-        // TODO something about the wrist?
 
         /*Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -149,7 +120,7 @@ public class NotFakeAutonomous extends LinearOpMode {
 
             telemetry.update();
         }
-        ArmUtil.stop();
+        //ArmUtil.stop();
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
