@@ -85,58 +85,35 @@ public class NotFakeAutonomous extends LinearOpMode {
         sleep(1000);
         if((bottomColorSensor.red()>bottomColorSensor.blue())==(alSensor.red()>alSensor.blue())) { // Clockwise
             telemetry.addData("Color", "Clockwise");
-            bl.setPower(-0.25);
-            fl.setPower(-0.25);
-            br.setPower(-0.25);
-            fr.setPower(-0.25);
+            ChassisUtil.setPower(0.25, -0.25);
             sleep(500);
-            bl.setPower(0.25);
-            fl.setPower(0.25);
-            br.setPower(0.25);
-            fr.setPower(0.25);
+            ChassisUtil.setPower(-0.25, 0.25);
         } else { // Counterclockwise
             telemetry.addData("Color", "Counterclockwise");
-            bl.setPower(0.25);
-            fl.setPower(0.25);
-            br.setPower(0.25);
-            fr.setPower(0.25);
+            ChassisUtil.setPower(-0.25, 0.25);
             sleep(500);
-            bl.setPower(-0.25);
-            fl.setPower(-0.25);
-            br.setPower(-0.25);
-            fr.setPower(-0.25);
+            ChassisUtil.setPower(0.25, -0.25);
         }
         sleep(500);
-        bl.setPower(0);
-        fl.setPower(0);
-        br.setPower(0);
-        fr.setPower(0);
+        ChassisUtil.setPower(0);
         alArm.setPosition(0.04);
 
         // Safe Zone
 
         //forwards
-        bl.setPower(-0.25);
-        fl.setPower(-0.25);
-        //invert the right side
-        br.setPower(0.25);
-        fr.setPower(0.25);
+        ChassisUtil.setPower(0.25);
 
         sleep(500);
         for(int x=0; x<300&&Math.abs(bottomColorSensor.red()-bottomColorSensor.green())+Math.abs(bottomColorSensor.blue()-bottomColorSensor.green())<3; x++) sleep(10);
 
         //stop moving the robot
-        bl.setPower(0);
-        fl.setPower(0);
-        br.setPower(0);
-        fr.setPower(0);
+        ChassisUtil.setPower(0);
 
         sleep(1000);
 
         // Get arm ready for teleop
         ArmUtil.horizontalToPosition(0, 0.5);
         ArmUtil.verticalToPosition(-45, 0.1);
-        // TODO something about the wrist?
 
         /*Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -146,7 +123,6 @@ public class NotFakeAutonomous extends LinearOpMode {
         }, 0, 10); // 10ms*/
 
         while(opModeIsActive()) {
-
             telemetry.update();
         }
         ArmUtil.stop();

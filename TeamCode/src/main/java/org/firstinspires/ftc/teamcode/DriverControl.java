@@ -48,15 +48,11 @@ public class DriverControl extends LinearOpMode {
         ArmUtil.lengthSensor=hardwareMap.get(AnalogInput.class, "lengthSensor");
 
         // Chassis
-        DcMotor bl=hardwareMap.get(DcMotor.class, "bl"), br=hardwareMap.get(DcMotor.class, "br"), fl=hardwareMap.get(DcMotor.class, "fl"), fr=hardwareMap.get(DcMotor.class, "fr");
-        bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ChassisUtil.bl=hardwareMap.get(DcMotor.class, "bl");
+        ChassisUtil.br=hardwareMap.get(DcMotor.class, "br");
+        ChassisUtil.fl=hardwareMap.get(DcMotor.class, "fl");
+        ChassisUtil.fr=hardwareMap.get(DcMotor.class, "fr");
+
 
         // Al Arm
         Servo alArm=hardwareMap.get(Servo.class, "alArm");
@@ -77,6 +73,7 @@ public class DriverControl extends LinearOpMode {
         wristRotate.setPosition(0.6);
 
         ArmUtil.armInit(); // Zero encoders and things
+        ChassisUtil.init();
 
 
         // ##################################################
@@ -219,16 +216,9 @@ public class DriverControl extends LinearOpMode {
                 leftPower=rightPower;
             }
             double left=ArmUtil.limit(-y+x+leftPower, -1, 1)*0.75, right=ArmUtil.limit(-y-x+rightPower, -1, 1)*0.75;
-            if(Math.abs(lastLPower-left)>0.005) {
-                bl.setPower(-left);
-                fl.setPower(-left);
-                lastLPower=left;
-            }
-            if(Math.abs(lastRPower-right)>0.005) {
-                br.setPower(right);
-                fr.setPower(right);
-                lastRPower=right;
-            }
+
+            ChassisUtil.setPower(left, right);
+
 
             // Old chassis control
             //double leftPower=gamepad2.left_trigger;
@@ -261,10 +251,7 @@ public class DriverControl extends LinearOpMode {
             telemetry.update();
         }
         ArmUtil.stop();
-        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        ChassisUtil.stop();
         timer.cancel();
     }
 }

@@ -40,12 +40,16 @@ public class ExtendoMove extends LinearOpMode {
 
         AnalogInput lengthSensor=hardwareMap.get(AnalogInput.class, "lengthSensor");
 
+        ColorSensor alSensor=hardwareMap.get(ColorSensor.class, "alSensor");
         ColorSensor bottomColorSensor=hardwareMap.get(ColorSensor.class, "bottomSensor");
         bottomColorSensor.setI2cAddress(I2cAddr.create8bit(0x42));
+        alSensor.enableLed(true);
         bottomColorSensor.enableLed(true);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+        Servo alArm=hardwareMap.get(Servo.class, "alArm");
 
         waitForStart();
 
@@ -67,14 +71,27 @@ public class ExtendoMove extends LinearOpMode {
             else if(gamepad2.dpad_down) wristWinch.setPower(-0.25);
             else wristWinch.setPower(0);
 
+            alArm.setPosition(Math.abs(gamepad2.left_stick_y));
+
+            telemetry.addData("Servo Position", Math.abs(gamepad2.left_stick_y));
+
             telemetry.addData("Length Sensor", lengthSensor.getVoltage());
             telemetry.addData("Encoder", extendo.getCurrentPosition()-extendoOffset);
 
-            telemetry.addData("ARGB", bottomColorSensor.argb());
-            telemetry.addData("Red", bottomColorSensor.red());
-            telemetry.addData("Green", bottomColorSensor.green());
-            telemetry.addData("Blue", bottomColorSensor.blue());
-            telemetry.addData("Alpha", bottomColorSensor.alpha());
+            telemetry.addData("Bottom Red", bottomColorSensor.red());
+            telemetry.addData("Bottom Green", bottomColorSensor.green());
+            telemetry.addData("Bottom Blue", bottomColorSensor.blue());
+            telemetry.addData("Bottom Alpha", bottomColorSensor.alpha());
+
+            telemetry.addData("Al's Red", alSensor.red());
+            telemetry.addData("Al's Green", alSensor.green());
+            telemetry.addData("Al's Blue", alSensor.blue());
+            telemetry.addData("Al's Alpha", alSensor.alpha());
+
+            telemetry.addData("Al's Red ARGB", alSensor.argb()&255);
+            telemetry.addData("Al's Green ARGB", (alSensor.argb()>>8)&255);
+            telemetry.addData("Al's Blue ARGB", (alSensor.argb()>>16)&255);
+            telemetry.addData("Al's Alpha ARGB", (alSensor.argb()>>24)&255);
 
             telemetry.update();
         }

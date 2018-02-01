@@ -36,15 +36,10 @@ public class NotFakeAutonomousJewel extends LinearOpMode {
         ArmUtil.grabber=hardwareMap.get(CRServo.class, "grabber");
 
         // Chassis
-        DcMotor bl=hardwareMap.get(DcMotor.class, "bl"), br=hardwareMap.get(DcMotor.class, "br"), fl=hardwareMap.get(DcMotor.class, "fl"), fr=hardwareMap.get(DcMotor.class, "fr");
-        bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ChassisUtil.fl=hardwareMap.get(DcMotor.class, "fl");
+        ChassisUtil.fr=hardwareMap.get(DcMotor.class, "fr");
+        ChassisUtil.bl=hardwareMap.get(DcMotor.class, "bl");
+        ChassisUtil.br=hardwareMap.get(DcMotor.class, "br");
 
         // Color sensors
         ColorSensor alSensor=hardwareMap.get(ColorSensor.class, "alSensor");
@@ -68,14 +63,47 @@ public class NotFakeAutonomousJewel extends LinearOpMode {
         // #                      RUN                       #
         // ##################################################
 
+        ChassisUtil.init();
+
         alArm.setPosition(0.04);
 
         wristRotate.setPosition(0.6);
 
 
         // Jewel
-        alArm.setPosition(0.7);
+        int red = 0, blue = 0;
+        alArm.setPosition(0.60);
         sleep(1000); // TODO put these changes in the other ones
+        red+= alSensor.red();
+        blue+= alSensor.blue();
+        for(double i=0.61; i<=0.7; i+=0.01) {
+            alArm.setPosition(i);
+            sleep(50);
+            red+= alSensor.red();
+            blue+= alSensor.blue();
+        }
+
+        telemetry.addData("Al Red", red);
+        telemetry.addData("Al Blue", blue);
+
+        if(red>blue&&bottomColorSensor.red()>bottomColorSensor.blue()) {
+            telemetry.addData("Color", "Clockwise");
+            ChassisUtil.setPower(0.25, -0.25);
+            sleep(500);
+            ChassisUtil.setPower(-0.25, 0.25);
+
+        } else if(red<blue&&bottomColorSensor.red()<bottomColorSensor.blue()) { // Counterclockwise
+            telemetry.addData("Color", "Counterclockwise");
+            ChassisUtil.setPower(-0.25, 0.25);
+            sleep(500);
+            ChassisUtil.setPower(0.25, -0.25);
+        } else {
+            telemetry.addData("fuck", true);
+        }
+        sleep(550);
+        ChassisUtil.setPower(0);
+
+        /*
         if(alSensor.red()!=alSensor.blue()) {
             if((bottomColorSensor.red()>bottomColorSensor.blue())==(alSensor.red()>alSensor.blue())) { // Clockwise
                 telemetry.addData("Color", "Clockwise");
@@ -100,12 +128,14 @@ public class NotFakeAutonomousJewel extends LinearOpMode {
                 br.setPower(-0.25);
                 fr.setPower(-0.25);
             }
-            sleep(500);
+            sleep(550);
             bl.setPower(0);
             fl.setPower(0);
             br.setPower(0);
             fr.setPower(0);
+
         }
+        */
         alArm.setPosition(0.04);
 
 
@@ -116,15 +146,12 @@ public class NotFakeAutonomousJewel extends LinearOpMode {
             }
         }, 0, 10); // 10ms*/
 
-        while(opModeIsActive()) {
+        telemetry.update();
 
-            telemetry.update();
-        }
+        while(opModeIsActive()) {}
+
         //ArmUtil.stop();
-        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        ChassisUtil.stop();
         //timer.cancel();
     }
 }
