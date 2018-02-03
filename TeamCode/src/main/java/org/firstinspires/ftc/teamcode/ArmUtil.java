@@ -8,10 +8,9 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.configuration.MotorConfigurationType;
-
-import java.util.Arrays;
 
 public class ArmUtil {
 
@@ -22,7 +21,7 @@ public class ArmUtil {
     // Motors and sensors
     public static DcMotor horizontalTurret, verticalTurret, wristWinch, extendoMotor;
     public static ModernRoboticsTouchSensor horizontalLimit, verticalLimit, wristLimit, grabberLimit;
-    public static Servo wristHorizontal;
+    public static Servo wristHorizontal, wristRotate;
     public static CRServo grabber;
     public static AnalogInput lengthSensor;
 
@@ -37,9 +36,10 @@ public class ArmUtil {
     private static final int VERTICAL_INIT=45, VERTICAL_MIN_OB=-10, VERTICAL_MIN=-45, VERTICAL_MAX=45; // Degrees
     private static final int HORIZONTAL_MIN=-180, HORIZONTAL_MAX=90;
     private static final int VERTICAL_STEP=28, HORIZONTAL_STEP=12; // Conversion from steps to degrees
-    private static final int EXTENDO_MAX=32445; // 15 inches
+    private static final int EXTENDO_MAX=36624; // 16 inches
     private static final int H_WRIST_RANGE=70, H_WRIST_OFFSET=0;
     private static final int WRIST_INIT=600, WRIST_MIN=-1500, WRIST_MAX=900; // Steps
+    public static final double ROTATE_FLAT=0.6, ROTATE_VERTICAL=0;
 
 
 
@@ -57,14 +57,13 @@ public class ArmUtil {
         }
     }
 
-    // TODO setPram never used because it's weird?
-    private static void setPram(Object thing, Object pram, Object lastPram) {
+    /*private static void setPram(Object thing, Object pram, Object lastPram) {
         if(!pram.equals(lastPram)&&thing instanceof DcMotor) {
             if(pram instanceof DcMotor.RunMode) ((DcMotor)thing).setMode((DcMotor.RunMode)pram);
             else if(pram instanceof Double) ((DcMotor)thing).setPower((double)pram);
             else if(pram instanceof Integer) ((DcMotor)thing).setTargetPosition((int)pram);
         }
-    }
+    }*/
 
     public static int limit(int in, int min, int max) { // Limits range of other stuff
         if(in<min) return min;
@@ -76,6 +75,21 @@ public class ArmUtil {
         if(in<min) return min;
         else if(in>max) return max;
         else return in;
+    }
+
+    public static void getHardware(HardwareMap hardwareMap) {
+        horizontalTurret=hardwareMap.get(DcMotor.class, "horizontalTurret");
+        verticalTurret=hardwareMap.get(DcMotor.class, "verticalTurret");
+        wristWinch=hardwareMap.get(DcMotor.class, "wristWinch");
+        extendoMotor=hardwareMap.get(DcMotor.class, "extendo");
+        horizontalLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "horizontalLimit");
+        verticalLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "verticalLimit");
+        wristLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "wristLimit");
+        grabberLimit=hardwareMap.get(ModernRoboticsTouchSensor.class, "grabberLimit");
+        wristHorizontal=hardwareMap.get(Servo.class, "wristHorizontal");
+        grabber=hardwareMap.get(CRServo.class, "grabber");
+        lengthSensor=hardwareMap.get(AnalogInput.class, "lengthSensor");
+        wristRotate=hardwareMap.get(Servo.class, "wristRotate");
     }
 
     public static void armInit() {
@@ -101,8 +115,11 @@ public class ArmUtil {
         wristWinch.setMotorType(MotorConfigurationType.getMotorType(TetrixMotor.class));
         extendoMotor.setMotorType(MotorConfigurationType.getMotorType(NeveRest3_7GearmotorV1.class));
 
+        grabber.setPower(0); // Don't move grabber
 
         wristHorizontal.setPosition(0.5); // Center wrist servo
+
+        wristRotate(ROTATE_FLAT); // Make wrist flat
 
         verticalOffset=verticalTurret.getCurrentPosition()+VERTICAL_INIT*VERTICAL_STEP; // Get zeros for arm
         horizontalOffset=horizontalTurret.getCurrentPosition();
@@ -110,12 +127,12 @@ public class ArmUtil {
 
         verticalToPosition(0, 1); // Bring arm up
 
-        /*wristWinch.setPower(1); // Pull winch up quickly
-        for(int x=0; x<100&&!wristLimit.isPressed(); x++) sleep(10);
+        wristWinch.setPower(0.5); // Pull winch up quickly
+        for(int x=0; x<200&&!wristLimit.isPressed(); x++) sleep(10);
         wristWinch.setPower(-0.25); // Release slowly until it drops off the switch
-        for(int x=0; x<100&&wristLimit.isPressed(); x++) sleep(10);
+        for(int x=0; x<200&&wristLimit.isPressed(); x++) sleep(10);
         wristWinch.setPower(0);
-        winchOffset=wristWinch.getCurrentPosition()+WRIST_INIT; // Capture 0*/
+        winchOffset=wristWinch.getCurrentPosition()+WRIST_INIT; // Capture 0
     }
 
     public static void stop() { // Stops movement of everything
@@ -155,7 +172,7 @@ public class ArmUtil {
     public static void verticalSetPower(double power) { // Vertical constant speed
         // Assuming hPos and vPos have already been updated
 
-        int min=(hPos==0||Math.abs(hPos)>=90)?VERTICAL_MIN:VERTICAL_MIN_OB; // Current minimum based on arm position
+        int min=(Math.abs(hPos)<5||Math.abs(hPos)>=90)?VERTICAL_MIN:VERTICAL_MIN_OB; // Current minimum based on arm position
 
         if((vPos<min&&power>0)||(vPos<=VERTICAL_MAX&&vPos>=min)||(vPos>VERTICAL_MAX&&power<0)) vPower=power; // Allow arm to be brought back from extremes
         else if(vPos<min&&Math.abs(hPower)>0) vPower=0.25; // Automatically move arm up if it's about to hit the robot
@@ -206,7 +223,7 @@ public class ArmUtil {
         hPos=deg;
         deg=deg*12+horizontalOffset;
         horizontalTurret.setTargetPosition(deg);
-        for(int x=0; x<500&&Math.abs(horizontalTurret.getCurrentPosition()-deg)>=10; x++) sleep(10); // Tighter tolerance on horizontal
+        //for(int x=0; x<500&&Math.abs(horizontalTurret.getCurrentPosition()-deg)>=10; x++) sleep(10); // Tighter tolerance on horizontal
     }
 
     public static void horizontalSetPower(double power) { // Horizontal constant speed
@@ -215,14 +232,14 @@ public class ArmUtil {
         if(((hPos<HORIZONTAL_MIN&&power>0)||(hPos<=HORIZONTAL_MAX&&hPos>=HORIZONTAL_MIN)||(hPos>HORIZONTAL_MAX&&power<0))&&(hPos!=0||vPos>=VERTICAL_MIN_OB)) hPower=power; // Allow arm to be brought back from extremes
         else hPower=0;
 
-        //if(Math.abs(hPower)<0.0025) { // Lock motor if power is low
-        //    if(!hLocked) { // Only send commands once
-        //        horizontalTurret.setTargetPosition(horizontalTurret.getCurrentPosition());
-        //        horizontalTurret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //        horizontalTurret.setPower(0.1);
-        //        hLocked=true;
-        //    }
-        //} else {
+        if(Math.abs(hPower)<0.0025) { // Lock motor if power is low
+            if(!hLocked) { // Only send commands once
+                horizontalTurret.setTargetPosition(horizontalTurret.getCurrentPosition());
+                horizontalTurret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                horizontalTurret.setPower(0.01);
+                hLocked=true;
+            }
+        } else {
             if(hLocked) {
                 horizontalTurret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 hLocked=false;
@@ -231,7 +248,7 @@ public class ArmUtil {
                 horizontalTurret.setPower(hPower);
                 hLastPow=hPower;
             }
-        //}
+        }
     }
 
     public static void updateHPos() { // Get degrees of horizontal motor
@@ -402,6 +419,23 @@ public class ArmUtil {
         if(Math.abs(grabLastPow-pow)>0.01) { // Only update power if there's a difference
             grabber.setPower(pow);
             grabLastPow=pow;
+        }
+    }
+
+
+
+
+
+    // ##################################################
+    // #                 WRIST ROTATION                 #
+    // ##################################################
+
+    private static double rotateLastPos=0;
+
+    public static void wristRotate(double pos) {
+        if(Math.abs(pos-rotateLastPos)>0.005) {
+            wristRotate.setPosition(pos);
+            rotateLastPos=pos;
         }
     }
 }

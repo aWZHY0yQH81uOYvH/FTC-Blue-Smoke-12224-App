@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(group="NotFakeDrive")
-public class NotFakeAutonomousReverse extends LinearOpMode {
+public class NotFakeAutonomousForward extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -39,7 +39,7 @@ public class NotFakeAutonomousReverse extends LinearOpMode {
 
         if(!jewelResult.contains("timeout")) {
             telemetry.addData("Safe zone result",
-                    AutonomousStuff.safeZone(AutonomousStuff.REVERSE));
+                    AutonomousStuff.safeZone(AutonomousStuff.FORWARD));
             telemetry.update();
         }
 
