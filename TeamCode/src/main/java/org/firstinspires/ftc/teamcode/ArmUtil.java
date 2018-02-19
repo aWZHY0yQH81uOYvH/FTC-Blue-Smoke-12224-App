@@ -125,7 +125,7 @@ public class ArmUtil {
         horizontalOffset=horizontalTurret.getCurrentPosition();
         extendoOffset=extendoMotor.getCurrentPosition();
 
-        verticalToPosition(0, 1); // Bring arm up
+        verticalToPosition(30, 1); // Bring arm up
 
         wristWinch.setPower(0.5); // Pull winch up quickly
         for(int x=0; x<200&&!wristLimit.isPressed(); x++) sleep(10);
@@ -133,6 +133,8 @@ public class ArmUtil {
         for(int x=0; x<200&&wristLimit.isPressed(); x++) sleep(10);
         wristWinch.setPower(0);
         winchOffset=wristWinch.getCurrentPosition()+WRIST_INIT; // Capture 0
+
+        horizontalToPosition(0, 0.03);
     }
 
     public static void stop() { // Stops movement of everything
@@ -174,9 +176,11 @@ public class ArmUtil {
 
         int min=(Math.abs(hPos)<5||Math.abs(hPos)>=90)?VERTICAL_MIN:VERTICAL_MIN_OB; // Current minimum based on arm position
 
-        if((vPos<min&&power>0)||(vPos<=VERTICAL_MAX&&vPos>=min)||(vPos>VERTICAL_MAX&&power<0)) vPower=power; // Allow arm to be brought back from extremes
-        else if(vPos<min&&Math.abs(hPower)>0) vPower=0.25; // Automatically move arm up if it's about to hit the robot
-        else vPower=0;
+        //if((vPos<min&&power>0)||(vPos<=VERTICAL_MAX&&vPos>=min)||(vPos>VERTICAL_MAX&&power<0)) vPower=power; // Allow arm to be brought back from extremes
+        //else if(vPos<min&&Math.abs(hPower)>0) vPower=0.25; // Automatically move arm up if it's about to hit the robot
+        //else vPower=0;
+        vPower=power;
+        // TODO remove danger
 
         if(Math.abs(vPower)<0.005) { // Lock motor if power is low
             if(!vLocked) { // Only send commands once
@@ -229,8 +233,10 @@ public class ArmUtil {
     public static void horizontalSetPower(double power) { // Horizontal constant speed
         // Assuming hPos and vPos have already been updated
 
-        if(((hPos<HORIZONTAL_MIN&&power>0)||(hPos<=HORIZONTAL_MAX&&hPos>=HORIZONTAL_MIN)||(hPos>HORIZONTAL_MAX&&power<0))&&(hPos!=0||vPos>=VERTICAL_MIN_OB)) hPower=power; // Allow arm to be brought back from extremes
-        else hPower=0;
+        //if(((hPos<HORIZONTAL_MIN&&power>0)||(hPos<=HORIZONTAL_MAX&&hPos>=HORIZONTAL_MIN)||(hPos>HORIZONTAL_MAX&&power<0))&&(hPos!=0||vPos>=VERTICAL_MIN_OB)) hPower=power; // Allow arm to be brought back from extremes
+        //else hPower=0;
+        hPower=power;
+        // TODO remove danger
 
         if(Math.abs(hPower)<0.0025) { // Lock motor if power is low
             if(!hLocked) { // Only send commands once

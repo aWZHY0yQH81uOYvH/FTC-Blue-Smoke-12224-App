@@ -31,7 +31,6 @@ public class NotFakeAutonomousReverse extends LinearOpMode {
 
         ArmUtil.armInit();
         ArmUtil.horizontalToPosition(0, 0.03);
-        ArmUtil.verticalToPosition(30, 0.1);
         AutonomousStuff.autonomousInit();
 
         String jewelResult=AutonomousStuff.jewel();

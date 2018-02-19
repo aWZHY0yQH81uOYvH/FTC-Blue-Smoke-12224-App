@@ -82,7 +82,7 @@ public class DriverControl extends LinearOpMode {
             } else zeroRegister=false;
 
             if(gamepad1.a) ArmUtil.horizontalSetPower(gamepad1.left_stick_x*0.5);
-            else ArmUtil.horizontalSetPower(gamepad1.left_stick_x*0.25); // Arm movement
+            else ArmUtil.horizontalSetPower(gamepad1.left_stick_x*0.1); // Arm movement
 
             ArmUtil.verticalSetPower(-gamepad1.left_stick_y*0.5);
 

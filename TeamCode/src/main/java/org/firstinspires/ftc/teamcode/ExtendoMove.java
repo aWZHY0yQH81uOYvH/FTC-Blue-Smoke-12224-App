@@ -51,6 +51,12 @@ public class ExtendoMove extends LinearOpMode {
 
         Servo alArm=hardwareMap.get(Servo.class, "alArm");
 
+        Servo wristRotate=hardwareMap.get(Servo.class, "wristRotate");
+        wristRotate.setPosition(0.6);
+        Servo wristHorizontal=hardwareMap.get(Servo.class, "wristHorizontal");
+        wristHorizontal.setPosition(0.5);
+        CRServo grabber=hardwareMap.get(CRServo.class, "grabber");
+        grabber.setPower(0);
         waitForStart();
 
 
